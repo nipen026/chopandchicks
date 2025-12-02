@@ -1,6 +1,7 @@
-import BestsellerSection from "@/Components/BestsellerSection";
-import CategorySection from "@/Components/Category";
-import DownloadAppSection from "@/Components/DownloadAppSection";
+import BestsellerSection from "../Components/BestsellerSection";
+import CategorySection from "../Components/Category";
+import DownloadAppSection from "../Components/DownloadAppSection";
+
 
 export default function Home() {
   return (

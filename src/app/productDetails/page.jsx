@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
-import BestsellerSection from "@/Components/BestsellerSection";
-import CartSidebar from "@/Components/CartSidebar";
-import DownloadAppSection from "@/Components/DownloadAppSection";
-import ProductDetailInfo from "@/Components/ProductDetailInfo";
+import BestsellerSection from "../Components/BestsellerSection";
+import CartSidebar from "../Components/CartSidebar";
+import DownloadAppSection from "../Components/DownloadAppSection";
+import ProductDetailInfo from "../Components/ProductDetailInfo";
 
 export default function ProductDetails() {
     const [openCart, setOpenCart] = useState(false);
