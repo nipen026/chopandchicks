@@ -70,7 +70,7 @@ const handleVerifyOtp = async () => {
                         </button>
 
                         {/* Title */}
-                        <h2 className="text-center text-3xl font-semibold text-gray-800">Verify OTP</h2>
+                        <h2 className="text-center text-3xl font-semibold text-black">Verify OTP</h2>
                         <p className="text-center text-gray-500 text-sm mb-6">
                             Enter the 6-digit code sent to your number
                         </p>
@@ -85,7 +85,7 @@ const handleVerifyOtp = async () => {
                                     maxLength={1}
                                     value={digit}
                                     onChange={(e) => handleChange(e.target.value, i)}
-                                    className="w-12 h-12 text-xl text-center border border-gray-300 rounded-lg
+                                    className="w-12 h-12 text-xl text-black text-center border border-gray-300 rounded-lg
                                     focus:border-red-500 outline-none transition"
                                 />
                             ))}

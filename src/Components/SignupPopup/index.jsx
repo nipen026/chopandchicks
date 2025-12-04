@@ -242,7 +242,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                     <FcGoogle size={40} />
                   </button>
                 </div>
-                <div className="text-center mt-5">
+                <div className="text-center text-black mt-5">
                   <p className="text-center">By registering , you agree to your </p>
                   <p><a href="/" className="text-primary underline">Terms of services</a> and <a href="/" className="text-primary underline">Privacy Policy</a> </p>
                 </div>
@@ -253,7 +253,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
             {activeTab === "phone" && (
               <>
                 <div className="mb-4">
-                  <label className="font-semibold text-sm">Mobile No *</label>
+                  <label className="font-semibold text-black text-sm">Mobile No *</label>
                   <input
                     type="text"
                     className="w-full mt-1 px-4 py-3 focus:border-red-500 outline-none border rounded-xl"
@@ -288,7 +288,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                 </div>
 
                 <div className="mb-6 relative">
-                  <label className="font-semibold text-sm">
+                  <label className="font-semibold text-black text-sm">
                     Confirm Password *
                   </label>
                   <input
@@ -327,7 +327,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                     <FcGoogle size={40} />
                   </button>
                 </div>
-                <div className="text-center mt-5">
+                <div className="text-center text-black mt-5">
                   <p className="text-center">By registering , you agree to your </p>
                   <p><a href="/" className="text-primary underline">Terms of services</a> and <a href="/" className="text-primary underline">Privacy Policy</a> </p>
                 </div>

@@ -32,7 +32,7 @@ export default function ForgotPasswordModal({ open, onClose, onContinue, setIsSi
             {/* Heading */}
             <h2 className="text-xl font-semibold text-gray-800 text-center">Forgot password?</h2>
 
-            <label className="block text-sm font-medium mt-6 mb-1">Email</label>
+            <label className="block text-sm text-black font-medium mt-6 mb-1">Email</label>
             <input
               type="email"
               placeholder="example@gmail.com"

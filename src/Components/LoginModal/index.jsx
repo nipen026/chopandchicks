@@ -217,7 +217,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                 </div>
 
                                 {/* Sign Up Switch */}
-                                <div className="text-center mb-3">
+                                <div className="text-center text-black mb-3">
                                     <p>
                                         Don’t have an account?{" "}
                                         <span
@@ -256,7 +256,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
 
                             <div>
                                 <div className="mb-4">
-                                    <label className="font-semibold text-sm">Mobile No *</label>
+                                    <label className="font-semibold text-black text-sm">Mobile No *</label>
                                     <input
                                         type="text"
                                         className="w-full mt-1 px-4 py-3 focus:border-red-500 outline-none border rounded-xl"
@@ -308,7 +308,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                 </div>
 
                                 {/* Sign Up Switch */}
-                                <div className="text-center mb-3">
+                                <div className="text-center text-black mb-3">
                                     <p>
                                         Don’t have an account?{" "}
                                         <span
