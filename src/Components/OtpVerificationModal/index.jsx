@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-
-export default function OtpVerificationModal({ open, onClose, setIsLast }) {
+import { supabase } from "../../lib/supabaseClient";
+export default function OtpVerificationModal({ open, onClose, setIsLast,number }) {
     const [show, setShow] = useState(false);
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
@@ -21,7 +21,31 @@ export default function OtpVerificationModal({ open, onClose, setIsLast }) {
         const next = document.getElementById(`otp-${index + 1}`);
         if (value && next) next.focus();
     };
+const handleVerifyOtp = async () => {
+    const otpCode = otp.join(""); // join 6 digits into one string
+    const phoneNumber = `+91${number}`; // replace with actual number
 
+    try {
+        const { data, error } = await supabase.auth.verifyOtp({
+            phone: phoneNumber,
+            token: otpCode,
+            type: "sms"
+        });
+
+        if (error) {
+            alert(`OTP Verification Failed: ${error.message}`);
+            return;
+        }
+
+        console.log("OTP Verified:", data);
+        // ✅ success: close modal & mark last step
+        onClose();
+        setIsLast(true);
+    } catch (err) {
+        console.error(err);
+        alert("Something went wrong while verifying OTP");
+    }
+};
     return (
         <>
             {open && (
@@ -68,7 +92,7 @@ export default function OtpVerificationModal({ open, onClose, setIsLast }) {
                         </div>
 
                         {/* Verify Button */}
-                        <button className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold" onClick={() => { onClose(); setIsLast(true) }}>
+                        <button className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold" onClick={() => { handleVerifyOtp() }}>
                             Verify OTP
                         </button>
 

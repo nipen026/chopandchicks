@@ -25,7 +25,7 @@ export default function Navbar() {
     const [isForgot, setIsForgot] = useState(false);
     const [isLast, setIsLast] = useState(false);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
-
+    const [phoneNumber,setPhoneNumber] = useState()
     const [openMenu, setOpenMenu] = useState(false);
     let authToken = ''
     if (typeof window !== "undefined") {
@@ -200,7 +200,7 @@ export default function Navbar() {
                                         setOpenMenu(false);
                                         setIsLogin(true);
                                     }}
-                                    className="flex items-center bg-red-600 text-white px-4 py-2 rounded-full gap-2"
+                                    className="flex items-center cursor-pointer bg-red-600 text-white px-4 py-2 rounded-full gap-2"
                                 >
                                     Login
                                     <span className="bg-white text-red-600 rounded-full p-1 px-2 text-sm">
@@ -213,8 +213,8 @@ export default function Navbar() {
             )}
 
             {/* MODALS */}
-            <SignupPopup open={isSignUp} onClose={() => setIsSignUp(false)} setIsOtp={setIsOtp} />
-            <OtpVerificationModal open={isOtp} onClose={() => setIsOtp(false)} setIsLast={setIsLast} />
+            <SignupPopup open={isSignUp} onClose={() => setIsSignUp(false)} setIsOtp={setIsOtp} setPhoneNumber={setPhoneNumber}/>
+            <OtpVerificationModal open={isOtp} onClose={() => setIsOtp(false)} setIsLast={setIsLast} number={phoneNumber}/>
             <LoginModal open={isLogin} onClose={() => setIsLogin(false)} setIsSignUp={setIsSignUp} setIsForgot={setIsForgot} />
             <ForgotPasswordModal open={isForgot} onClose={() => setIsForgot(false)} setIsSignUp={setIsSignUp} setIsLogin={setIsLogin} setIsLast={setIsLast} />
             <CongratulationModal open={isLast} onClose={() => setIsLast(false)} setIsLogin={setIsLogin} />

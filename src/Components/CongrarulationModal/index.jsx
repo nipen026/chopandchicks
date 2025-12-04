@@ -27,7 +27,7 @@ export default function CongratulationModal({ open, onClose,setIsLogin }) {
 
             <button
               onClick={()=>{onClose(); setIsLogin(true);}}
-              className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-full bg-gradient-to-r from-[#FF4B55] to-[#BA3139]"
+              className="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-full btn-gradient"
             >
               Back to Login
             </button>

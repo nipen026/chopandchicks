@@ -3,16 +3,18 @@ import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
+import { FiMail, FiPhone } from "react-icons/fi";
 
 
 export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) {
     const [show, setShow] = useState(false);
-
+    const [activeTab, setActiveTab] = useState("email");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
+    const [phone, setPhone] = useState()
     const [loading, setLoading] = useState(false);
     const [errMsg, setErrMsg] = useState("");
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (open) setTimeout(() => setShow(true), 10);
@@ -62,7 +64,43 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
         // Success
         onClose();
     };
+    const handlePhoneLogin = async () => {
+        setErrMsg("");
 
+        // Validation
+        if (!phone.trim()) {
+            setErrMsg("Email is required.");
+            return;
+        }
+
+        if (!password) {
+            setErrMsg("Password is required.");
+            return;
+        }
+        if (password.length < 6) {
+            setErrMsg("Password must be at least 6 characters long.");
+            return;
+        }
+
+        setLoading(true);
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+            phone: `+91${phone}`,
+            password,
+        });
+        if (typeof window !== "undefined") {
+            localStorage.setItem("auth-token", data.session.access_token);
+        }
+        setLoading(false);
+
+        if (error) {
+            setErrMsg(error.message); // Supabase error message e.g., "Invalid login credentials"
+            return;
+        }
+
+        // Success
+        onClose();
+    };
     // ---------------------------
     // Google Login Handler
     // ---------------------------
@@ -98,99 +136,213 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                         </button>
 
                         {/* Heading */}
-                        <h2 className="text-center text-3xl font-semibold text-gray-800">Login</h2>
+                        <h2 className="text-center text-3xl font-semibold text-black">Login</h2>
                         <p className="text-center text-gray-500 text-sm mb-6">
                             Login to continue to our website
                         </p>
-
-                        {/* Email */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-semibold text-gray-800 mb-1">Email</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Enter your email"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-3
-                focus:border-red-500 outline-none transition"
-                            />
-                        </div>
-
-                        {/* Password */}
-                        <div className="mb-5">
-                            <label className="block text-sm font-semibold text-gray-800 mb-1">Password</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter password"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-3
-                focus:border-red-500 outline-none transition"
-                            />
-                        </div>
-
-                        {/* Error Message */}
-                        {errMsg && (
-                            <p className="text-red-600 text-sm mb-3 text-center">{errMsg}</p>
-                        )}
-
-                        <div
-                            className="text-right text-sm text-secondary font-medium mb-4 cursor-pointer"
-                            onClick={() => {
-                                onClose();
-                                setIsForgot(true);
-                            }}
-                        >
-                            <p>Forgot Password?</p>
-                        </div>
-
-                        {/* Login Button */}
-                        <div className="flex justify-center">
+                        <div className="grid grid-cols-2 mb-6 gap-10 pb-2">
                             <button
-                                disabled={loading}
-                                onClick={handleLogin}
-                                className={`w-[264px] bg-red-600 hover:bg-red-700 text-white font-semibold
-                py-3 rounded-full transition mb-4 ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
+                                onClick={() => setActiveTab("email")}
+                                className={`justify-center flex items-center gap-2 pb-2 ${activeTab === "email"
+                                    ? "text-red-600 border-b-2 border-red-600"
+                                    : "text-gray-500"
+                                    }`}
                             >
-                                {loading ? "Logging in..." : "Login"}
+                                <FiMail size={18} /> Email
+                            </button>
+
+                            <button
+                                onClick={() => setActiveTab("phone")}
+                                className={`flex items-center justify-center gap-2 pb-2 ${activeTab === "phone"
+                                    ? "text-red-600 border-b-2 border-red-600"
+                                    : "text-gray-500"
+                                    }`}
+                            >
+                                <FiPhone size={18} /> Phone
                             </button>
                         </div>
+                        {/* Email */}
+                        {activeTab == 'email' &&
+                            <div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-semibold text-black mb-1">Email *</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Enter your email"
+                                        className="w-full  border border-gray-300 rounded-lg px-4 py-3
+                focus:border-red-500 outline-none transition"
+                                    />
+                                </div>
 
-                        {/* Sign Up Switch */}
-                        <div className="text-center mb-3">
-                            <p>
-                                Don’t have an account?{" "}
-                                <span
-                                    className="text-secondary cursor-pointer"
+                                {/* Password */}
+                                <div className="mb-5">
+                                    <label className="block text-sm font-semibold text-black mb-1">Password *</label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Enter password"
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3
+                focus:border-red-500 outline-none transition"
+                                    />
+                                </div>
+
+                                {/* Error Message */}
+                                {errMsg && (
+                                    <p className="text-red-600 text-sm mb-3 text-center">{errMsg}</p>
+                                )}
+
+                                <div
+                                    className="text-right text-sm text-secondary font-medium mb-4 cursor-pointer"
                                     onClick={() => {
-                                        setIsSignUp(true);
                                         onClose();
+                                        setIsForgot(true);
                                     }}
                                 >
-                                    Sign up
-                                </span>
-                            </p>
-                        </div>
+                                    <p>Forgot Password?</p>
+                                </div>
 
-                        {/* Social Login */}
-                        <div className="flex items-center justify-center gap-6">
-                            <button className="rounded-full">
-                                <Image
-                                    src="/assets/call.png"
-                                    width={40}
-                                    height={22}
-                                    alt="call"
-                                />
-                            </button>
+                                {/* Login Button */}
+                                <div className="flex justify-center">
+                                    <button
+                                        disabled={loading}
+                                        onClick={handleLogin}
+                                        className={`w-[264px] btn-gradient hover:bg-red-700 text-white font-semibold
+                py-3 rounded-full transition mb-4 ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
+                                    >
+                                        {loading ? "Logging in..." : "Login"}
+                                    </button>
+                                </div>
 
-                            {/* Google OAuth */}
-                            <button
-                                onClick={loginWithGoogle}
-                                className="rounded-full hover:bg-gray-100 p-1 transition"
-                            >
-                                <FcGoogle size={40} />
-                            </button>
-                        </div>
+                                {/* Sign Up Switch */}
+                                <div className="text-center mb-3">
+                                    <p>
+                                        Don’t have an account?{" "}
+                                        <span
+                                            className="text-secondary cursor-pointer"
+                                            onClick={() => {
+                                                setIsSignUp(true);
+                                                onClose();
+                                            }}
+                                        >
+                                            Sign up
+                                        </span>
+                                    </p>
+                                </div>
+
+                                {/* Social Login */}
+                                <div className="flex items-center justify-center gap-6">
+                                    <button className="rounded-full">
+                                        <Image
+                                            src="/assets/call.png"
+                                            width={40}
+                                            height={22}
+                                            alt="call"
+                                        />
+                                    </button>
+
+                                    {/* Google OAuth */}
+                                    <button
+                                        onClick={loginWithGoogle}
+                                        className="rounded-full hover:bg-gray-100 p-1 transition"
+                                    >
+                                        <FcGoogle size={40} />
+                                    </button>
+                                </div>
+                            </div>}
+                        {activeTab == 'phone' &&
+
+                            <div>
+                                <div className="mb-4">
+                                    <label className="font-semibold text-sm">Mobile No *</label>
+                                    <input
+                                        type="text"
+                                        className="w-full mt-1 px-4 py-3 focus:border-red-500 outline-none border rounded-xl"
+                                        placeholder="Enter phone number"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                    />
+
+                                </div>
+
+                                {/* Password */}
+                                <div className="mb-5">
+                                    <label className="block text-sm font-semibold text-black mb-1">Password *</label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Enter password"
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3
+                focus:border-red-500 outline-none transition"
+                                    />
+                                </div>
+
+                                {/* Error Message */}
+                                {errMsg && (
+                                    <p className="text-red-600 text-sm mb-3 text-center">{errMsg}</p>
+                                )}
+
+                                <div
+                                    className="text-right text-sm text-secondary font-medium mb-4 cursor-pointer"
+                                    onClick={() => {
+                                        onClose();
+                                        setIsForgot(true);
+                                    }}
+                                >
+                                    <p>Forgot Password?</p>
+                                </div>
+
+                                {/* Login Button */}
+                                <div className="flex justify-center">
+                                    <button
+                                        disabled={loading}
+                                        onClick={handlePhoneLogin}
+                                        className={`w-[264px] btn-gradient hover:bg-red-700 text-white font-semibold
+                py-3 rounded-full transition mb-4 ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
+                                    >
+                                        {loading ? "Logging in..." : "Login"}
+                                    </button>
+                                </div>
+
+                                {/* Sign Up Switch */}
+                                <div className="text-center mb-3">
+                                    <p>
+                                        Don’t have an account?{" "}
+                                        <span
+                                            className="text-secondary cursor-pointer"
+                                            onClick={() => {
+                                                setIsSignUp(true);
+                                                onClose();
+                                            }}
+                                        >
+                                            Sign up
+                                        </span>
+                                    </p>
+                                </div>
+
+                                {/* Social Login */}
+                                <div className="flex items-center justify-center gap-6">
+                                    <button className="rounded-full">
+                                        <Image
+                                            src="/assets/call.png"
+                                            width={40}
+                                            height={22}
+                                            alt="call"
+                                        />
+                                    </button>
+
+                                    {/* Google OAuth */}
+                                    <button
+                                        onClick={loginWithGoogle}
+                                        className="rounded-full hover:bg-gray-100 p-1 transition"
+                                    >
+                                        <FcGoogle size={40} />
+                                    </button>
+                                </div>
+                            </div>}
                     </div>
                 </div>
             )}

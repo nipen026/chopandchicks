@@ -13,7 +13,7 @@ export default function CategorySection() {
   return (
     <div className="container bg-[#F5F7FA] py-12 ">
       {/* Heading */}
-      <h2 className="text-2xl font-semibold">Shop by Category</h2>
+      <h2 className="text-2xl text-black font-semibold">Shop by Category</h2>
       <p className="text-gray-500 text-sm mt-1 mb-8">
         Most popular products near you!
       </p>

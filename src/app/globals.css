@@ -27,3 +27,6 @@ body {
   color: var(--foreground);
    font-family: "Fredoka", sans-serif;
 }
+.btn-gradient {
+  background: linear-gradient(90deg, #FF4B55 0%, #BA3139 100%);
+}

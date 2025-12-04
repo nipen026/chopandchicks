@@ -94,9 +94,9 @@ const NextArrow = ({ onClick }) => (
             px-3 py-2 rounded-e-full z-10
 
             md:right-20
-            lg:right-40
+            lg:right-[45rem]
             xl:right-[45rem]
-            hidden md:flex
+            hidden xl:flex
         "
     >
         <FaArrowRight />
@@ -114,7 +114,7 @@ const PrevArrow = ({ onClick }) => (
             md:left-20
             lg:left-40
             xl:left-[44rem]
-            hidden md:flex
+            hidden xl:flex
         "
     >
         <FaArrowLeft />
@@ -141,7 +141,7 @@ export default function BestsellerSection({ title, desc }) {
 
     return (
         <div className="container bg-[#F5F7FA] py-8 relative">
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-2xl text-black font-semibold">
                 {title || "Bestsellers"}
             </h2>
             <p className="text-gray-500 text-sm mt-1 mb-6">
