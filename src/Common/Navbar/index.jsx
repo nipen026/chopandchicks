@@ -25,7 +25,7 @@ export default function Navbar() {
     const [isForgot, setIsForgot] = useState(false);
     const [isLast, setIsLast] = useState(false);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
-    const [phoneNumber,setPhoneNumber] = useState()
+    const [phoneNumber, setPhoneNumber] = useState()
     const [openMenu, setOpenMenu] = useState(false);
     let authToken = ''
     if (typeof window !== "undefined") {
@@ -93,7 +93,7 @@ export default function Navbar() {
                     >
                         <FiSearch />
                     </button>
-                    
+
 
                     {/* RIGHT SECTION - Desktop Only */}
                     <div className="hidden md:flex items-center gap-8">
@@ -130,20 +130,20 @@ export default function Navbar() {
                     </div>
                 </div>
                 <div
-    className={`
+                    className={`
         md:hidden bg-gray-100 max-w-[90%] mx-auto rounded-xl px-4 overflow-hidden transition-all duration-300
         ${showMobileSearch ? "max-h-20 py-3 mt-3" : "max-h-0 py-0 mt-0"}
     `}
->
-    <div className="flex items-center gap-3">
-        <FiSearch className="text-gray-600 text-xl" />
-        <input
-            type="text"
-            placeholder="Search your favorite food..."
-            className="flex-1 bg-transparent outline-none text-sm"
-        />
-    </div>
-</div>
+                >
+                    <div className="flex items-center gap-3">
+                        <FiSearch className="text-gray-600 text-xl" />
+                        <input
+                            type="text"
+                            placeholder="Search your favorite food..."
+                            className="flex-1 bg-transparent outline-none text-sm"
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* ================= MOBILE SIDEBAR ================= */}
@@ -190,9 +190,9 @@ export default function Navbar() {
                                 Cart
                             </div>
                             {authToken ?
-                                <div className="flex items-center gap-3 text-lg">
-                                    <AiOutlineShopping className="text-2xl" />
-                                    Profile
+                                <div className="flex items-center gap-2 text-gray-700 cursor-pointer" onClick={() => { window.location.href = '/userProfile' }}>
+                                    <LuUserRound className="text-xl font-bold" />
+                                    <span>Profile</span>
                                 </div>
                                 :
                                 <button
@@ -213,8 +213,8 @@ export default function Navbar() {
             )}
 
             {/* MODALS */}
-            <SignupPopup open={isSignUp} onClose={() => setIsSignUp(false)} setIsOtp={setIsOtp} setPhoneNumber={setPhoneNumber}/>
-            <OtpVerificationModal open={isOtp} onClose={() => setIsOtp(false)} setIsLast={setIsLast} number={phoneNumber}/>
+            <SignupPopup open={isSignUp} onClose={() => setIsSignUp(false)} setIsOtp={setIsOtp} setPhoneNumber={setPhoneNumber} />
+            <OtpVerificationModal open={isOtp} onClose={() => setIsOtp(false)} setIsLast={setIsLast} number={phoneNumber} />
             <LoginModal open={isLogin} onClose={() => setIsLogin(false)} setIsSignUp={setIsSignUp} setIsForgot={setIsForgot} />
             <ForgotPasswordModal open={isForgot} onClose={() => setIsForgot(false)} setIsSignUp={setIsSignUp} setIsLogin={setIsLogin} setIsLast={setIsLast} />
             <CongratulationModal open={isLast} onClose={() => setIsLast(false)} setIsLogin={setIsLogin} />
