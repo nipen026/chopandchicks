@@ -171,7 +171,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="Enter your email"
-                                        className="w-full  border border-gray-300 rounded-lg px-4 py-3
+                                        className="w-full text-black  border border-gray-300 rounded-lg px-4 py-3
                 focus:border-red-500 outline-none transition"
                                     />
                                 </div>
@@ -184,7 +184,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter password"
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-3
+                                        className="w-full text-black border border-gray-300 rounded-lg px-4 py-3
                 focus:border-red-500 outline-none transition"
                                     />
                                 </div>
@@ -259,7 +259,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                     <label className="font-semibold text-black text-sm">Mobile No *</label>
                                     <input
                                         type="text"
-                                        className="w-full mt-1 px-4 py-3 focus:border-red-500 outline-none border rounded-xl"
+                                        className="w-full text-black mt-1 px-4 py-3 focus:border-red-500 outline-none border rounded-xl"
                                         placeholder="Enter phone number"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
@@ -275,7 +275,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter password"
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-3
+                                        className="w-full text-black border border-gray-300 rounded-lg px-4 py-3
                 focus:border-red-500 outline-none transition"
                                     />
                                 </div>

@@ -169,7 +169,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                   <label className="font-semibold text-black text-sm">Email *</label>
                   <input
                     type="email"
-                    className="w-full mt-1 px-4 py-3 border text-black focus:border-red-500 outline-none transition rounded-xl "
+                    className="w-full mt-1 text-black px-4 py-3 border text-black focus:border-red-500 outline-none transition rounded-xl "
                     placeholder="Enter Your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -183,7 +183,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                   <label className="font-semibold text-black text-sm">Password *</label>
                   <input
                     type={showPass ? "text" : "password"}
-                    className="w-full mt-1 px-4 py-3 border text-black focus:border-red-500 outline-none transition rounded-xl"
+                    className="w-full text-black mt-1 px-4 py-3 border text-black focus:border-red-500 outline-none transition rounded-xl"
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -207,7 +207,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                   </label>
                   <input
                     type={showConfirmPass ? "text" : "password"}
-                    className="w-full mt-1 px-4 py-3 border text-black focus:border-red-500 outline-none transition rounded-xl"
+                    className="w-full mt-1 text-black px-4 py-3 border text-black focus:border-red-500 outline-none transition rounded-xl"
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -256,7 +256,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                   <label className="font-semibold text-black text-sm">Mobile No *</label>
                   <input
                     type="text"
-                    className="w-full mt-1 px-4 py-3 focus:border-red-500 outline-none border rounded-xl"
+                    className="w-full text-black mt-1 px-4 py-3 focus:border-red-500 outline-none border rounded-xl"
                     placeholder="Enter phone number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -266,10 +266,10 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                   )}
                 </div>
                 <div className="mb-4 relative">
-                  <label className="font-semibold text-sm">Password *</label>
+                  <label className="font-semibold text-black text-sm">Password *</label>
                   <input
                     type={showPass ? "text" : "password"}
-                    className="w-full mt-1 px-4 py-3 border focus:border-red-500 outline-none transition rounded-xl"
+                    className="w-full text-black mt-1 px-4 py-3 border focus:border-red-500 outline-none transition rounded-xl"
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -293,7 +293,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                   </label>
                   <input
                     type={showConfirmPass ? "text" : "password"}
-                    className="w-full mt-1 px-4 py-3 border  focus:border-red-500 outline-none transition rounded-xl"
+                    className="w-full text-black mt-1 px-4 py-3 border  focus:border-red-500 outline-none transition rounded-xl"
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
