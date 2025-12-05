@@ -78,7 +78,7 @@ export default function ProductDetailInfo({ setOpenCart }) {
                         </div>
                     </div>
 
-                    <button onClick={() => setOpenCart(true)} className="bg-gradient-to-r from-red-900 to-red-600 hover:bg-red-700 text-white font-medium px-6 py-2.5 rounded-lg flex items-center gap-2 ease-linear">
+                    <button onClick={() => setOpenCart(true)} className="btn-gradient hover:bg-red-700 text-white font-medium px-6 py-2.5 rounded-lg flex items-center gap-2 ease-linear">
                         Add <span className="text-xl font-bold">+</span>
                     </button>
                 </div>

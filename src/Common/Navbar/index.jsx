@@ -33,7 +33,7 @@ export default function Navbar() {
     }
 
     return (
-        <div className="container mt-5 px-3 md:px-0">
+        <div className="sticky container mt-5 top-0 z-[999]">
 
             {/* NAVBAR */}
             <div className="w-full bg-white shadow-md py-3 px-4 md:px-6 md:rounded-full rounded-2xl ">

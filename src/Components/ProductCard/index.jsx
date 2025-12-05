@@ -28,7 +28,7 @@ export default function ProductCard({ item }) {
       <div className="flex items-center justify-between mt-3">
         <p className="font-semibold text-gray-800">₹{item.price}</p>
 
-        <button className="bg-secondary text-white text-xs px-4 py-1.5 rounded-full hover:bg-red-600 transition">
+        <button className="btn-gradient text-white text-xs px-4 py-1.5 rounded-full hover:bg-red-600 transition">
           Add +
         </button>
       </div>

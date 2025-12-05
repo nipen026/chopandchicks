@@ -142,7 +142,7 @@ export default function CartSidebar({ open, onClose }) {
                     <div className="w-full text-center shadow-lg py-3 font-semibold bg-white border">
                         Total : ₹{grandTotal}.00
                     </div>
-                    <button className="w-full bg-gradient-to-r from-red-900 to-red-600 hover:bg-red-700 text-white py-3 font-semibold">
+                    <button className="w-full btn-gradient hover:bg-red-700 text-white py-3 font-semibold">
                         Proceed to Checkout
                     </button>
                 </div>
