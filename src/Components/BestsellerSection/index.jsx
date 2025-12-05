@@ -95,8 +95,8 @@ const NextArrow = ({ onClick }) => (
 
             md:right-20
             lg:right-[45rem]
-            xl:right-[45rem]
-            hidden xl:flex
+            2xl:right-[45rem]
+            hidden 2xl:flex
         "
     >
         <FaArrowRight />
@@ -114,7 +114,7 @@ const PrevArrow = ({ onClick }) => (
             md:left-20
             lg:left-40
             xl:left-[44rem]
-            hidden xl:flex
+            hidden 2xl:flex
         "
     >
         <FaArrowLeft />
