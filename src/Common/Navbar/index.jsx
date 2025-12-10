@@ -10,7 +10,7 @@ import { CiUser } from "react-icons/ci";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoMdClose } from "react-icons/io";
 import SignupPopup from "../../Components/SignupPopup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OtpVerificationModal from "../../Components/OtpVerificationModal";
 import LoginModal from "../../Components/LoginModal";
 import ForgotPasswordModal from "../../Components/ForgotPasswordModal/ForgotPasswordModal";
@@ -25,14 +25,16 @@ export default function Navbar() {
     const [isLogin, setIsLogin] = useState(false);
     const [isForgot, setIsForgot] = useState(false);
     const [isLast, setIsLast] = useState(false);
+    const [token, setToken] = useState()
     const [showMobileSearch, setShowMobileSearch] = useState(false);
-    const [createAccountModal,setCreateAccountModal] = useState()
+    const [createAccountModal, setCreateAccountModal] = useState()
     const [phoneNumber, setPhoneNumber] = useState()
     const [openMenu, setOpenMenu] = useState(false);
-    let authToken = ''
-    if (typeof window !== "undefined") {
-        authToken = localStorage.getItem('auth-token')
-    }
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setToken(localStorage.getItem('auth-token'));
+        }
+    }, [])
 
     return (
         <div className="sticky container mt-5 top-0 ">
@@ -113,7 +115,7 @@ export default function Navbar() {
                             <AiOutlineShopping className="text-xl" />
                             <span>Cart</span>
                         </div>
-                        {authToken ?
+                        {token ?
                             <div className="flex items-center gap-2 text-gray-700 cursor-pointer" onClick={() => { window.location.href = '/userProfile' }}>
                                 <LuUserRound className="text-xl font-bold" />
                                 <span>Profile</span>
@@ -216,11 +218,11 @@ export default function Navbar() {
 
             {/* MODALS */}
             <SignupPopup open={isSignUp} onClose={() => setIsSignUp(false)} setIsOtp={setIsOtp} setPhoneNumber={setPhoneNumber} />
-            <OtpVerificationModal open={isOtp} onClose={() => setIsOtp(false)} setIsLast={setIsLast} number={phoneNumber} setCreateAccountModal={setCreateAccountModal}/>
+            <OtpVerificationModal open={isOtp} onClose={() => setIsOtp(false)} setIsLast={setIsLast} number={phoneNumber} setCreateAccountModal={setCreateAccountModal} />
             <LoginModal open={isLogin} onClose={() => setIsLogin(false)} setIsSignUp={setIsSignUp} setIsForgot={setIsForgot} />
             <ForgotPasswordModal open={isForgot} onClose={() => setIsForgot(false)} setIsSignUp={setIsSignUp} setIsLogin={setIsLogin} setIsLast={setIsLast} />
             <CongratulationModal open={isLast} onClose={() => setIsLast(false)} setIsLogin={setIsLogin} />
-            <CreateAccountModal open={createAccountModal} onClose={()=>setCreateAccountModal(false)} setIsLast={setIsLast}/>
+            <CreateAccountModal open={createAccountModal} onClose={() => setCreateAccountModal(false)} setIsLast={setIsLast} />
         </div>
     );
 }

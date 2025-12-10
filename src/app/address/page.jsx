@@ -1,24 +1,12 @@
 "use client"
 
 import PaymentMethod from "../../Components/PaymentMethod";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdHome, MdWork, MdLocationOn } from "react-icons/md";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function Address() {
-    const [addresses, setAddresses] = useState([
-        {
-            id: 1,
-            name: "Will Smith",
-            phone: "+8801235333344",
-            email: "customer@example.com",
-            city: "Dhaka",
-            state: "Dhaka",
-            country: "Bangladesh",
-            address: "House:3, Road:1, Block: c, Mirpur 2",
-            zip: "1216",
-        },
-    ]);
+    const [addresses, setAddresses] = useState([]);
 
     const [showModal, setShowModal] = useState(false);
     const [currentAddress, setCurrentAddress] = useState(null);
@@ -39,50 +27,77 @@ export default function Address() {
         setShowModal(true);
     };
 
-
     const handleSave = async () => {
         try {
-            const { user } = await supabase.auth.getUser()
-            let payload = {
-                full_name: 'NK',
-                contact_number: currentAddress.phone,
-                address_line: currentAddress.address,
-                flat_house_building: currentAddress.flat,
-                landmark: currentAddress.landmark,
-                city: currentAddress.city,
-                state: currentAddress.state,
-                country: currentAddress.country,
-                postal_code: currentAddress.zip,
-                latitude: currentAddress.lat ?? null,
-                longitude: currentAddress.lng ?? null,
-                address_type: currentAddress.type ?? "home",
+            const { data: authData } = await supabase.auth.getUser();
+            const user = authData?.user;
+
+            if (!user) {
+                alert("Login required");
+                return;
+            }
+
+            // Build correct address_line field
+            const addressLineFinal =
+                `${currentAddress.area || ""} ${currentAddress.flat || ""}`.trim();
+
+            const payload = {
+                p_id: isEditMode ? currentAddress.id : null,
+                p_full_name: currentAddress.name || "User",
+                p_contact_number: currentAddress.phone || "",
+                p_address_line: addressLineFinal,
+                p_flat_house_building: currentAddress.flat || "",
+                p_landmark: currentAddress.landmark || "",
+                p_city: currentAddress.city || "",
+                p_state: currentAddress.state || "",
+                p_country: currentAddress.country || "",
+                p_postal_code: currentAddress.zip || "",
+                p_latitude: currentAddress.lat ?? null,
+                p_longitude: currentAddress.lng ?? null,
+                p_address_type: currentAddress.type || "home",
             };
 
-            // const { data, error } = await supabase.rpc(
-            //   "upsert_user_address",
-            //   payload
-            // );   
-            const { data, error } = await supabase.from('user_address').upsert(payload)
+            console.log("FINAL PAYLOAD →", payload);
+
+            const { data, error } = await supabase.rpc("upsert_user_address", payload);
+
             if (error) {
                 console.error(error);
                 return alert("Error saving address");
             }
 
-            // Add/Update local UI list
+            const savedId = data?.id ?? currentAddress.id;
+
+            const newAddressObj = { ...currentAddress, id: savedId };
+
             if (isEditMode) {
-                setAddresses((prev) =>
-                    prev.map((a) => (a.id === currentAddress.id ? currentAddress : a))
-                );
+                setAddresses(prev => prev.map(a =>
+                    a.id === savedId ? newAddressObj : a
+                ));
             } else {
-                setAddresses((prev) => [...prev, currentAddress]);
+                setAddresses(prev => [...prev, newAddressObj]);
             }
 
             setShowModal(false);
+
         } catch (err) {
             console.error(err);
         }
     };
 
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            const { data, error } = await supabase
+                .from("user_address")
+                .select("*");
+
+            if (!error) {
+                setAddresses(data);
+            }
+        };
+
+        fetchAddresses();
+    }, []);
 
     return (
         <div className="min-h-screen pt-8">
@@ -173,17 +188,40 @@ export default function Address() {
                         </div>
 
                         {/* FORM */}
+                        {/* FORM */}
                         <div className="w-1/2 space-y-4">
 
                             <h2 className="text-xl font-semibold">
                                 {isEditMode ? "Edit Address" : "Add New Address"}
                             </h2>
 
+                            {/* Full Name */}
+                            <input
+                                type="text"
+                                placeholder="Full Name"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
+                                value={currentAddress.name}
+                                onChange={(e) =>
+                                    setCurrentAddress({ ...currentAddress, name: e.target.value })
+                                }
+                            />
+
+                            {/* Phone */}
+                            <input
+                                type="text"
+                                placeholder="Phone Number"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
+                                value={currentAddress.phone}
+                                onChange={(e) =>
+                                    setCurrentAddress({ ...currentAddress, phone: e.target.value })
+                                }
+                            />
+
                             {/* Area */}
                             <input
                                 type="text"
-                                placeholder="Search for Area / Locality"
-                                className="border bg-[#F2F2F2] focus:border-red-500 outline-none text-black p-2 rounded w-full"
+                                placeholder="Area / Locality"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
                                 value={currentAddress.area}
                                 onChange={(e) =>
                                     setCurrentAddress({ ...currentAddress, area: e.target.value })
@@ -193,8 +231,8 @@ export default function Address() {
                             {/* Flat */}
                             <input
                                 type="text"
-                                placeholder="Flat No / Building Name / Street Name"
-                                className="border bg-[#F2F2F2] focus:border-red-500 outline-none text-black p-2 rounded w-full"
+                                placeholder="Flat / Building / Street"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
                                 value={currentAddress.flat}
                                 onChange={(e) =>
                                     setCurrentAddress({ ...currentAddress, flat: e.target.value })
@@ -205,7 +243,7 @@ export default function Address() {
                             <input
                                 type="text"
                                 placeholder="Landmark"
-                                className="border bg-[#F2F2F2] focus:border-red-500 outline-none text-black p-2 rounded w-full"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
                                 value={currentAddress.landmark}
                                 onChange={(e) =>
                                     setCurrentAddress({ ...currentAddress, landmark: e.target.value })
@@ -216,21 +254,41 @@ export default function Address() {
                             <input
                                 type="text"
                                 placeholder="City"
-                                className="border bg-[#F2F2F2] focus:border-red-500 outline-none text-black p-2 rounded w-full"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
                                 value={currentAddress.city}
                                 onChange={(e) =>
                                     setCurrentAddress({ ...currentAddress, city: e.target.value })
                                 }
                             />
 
-                            {/* Phone */}
+                            {/* State */}
                             <input
                                 type="text"
-                                placeholder="Phone Number"
-                                className="border bg-[#F2F2F2] focus:border-red-500 outline-none text-black p-2 rounded w-full"
-                                value={currentAddress.phone}
+                                placeholder="State"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
+                                value={currentAddress.state}
                                 onChange={(e) =>
-                                    setCurrentAddress({ ...currentAddress, phone: e.target.value })
+                                    setCurrentAddress({ ...currentAddress, state: e.target.value })
+                                }
+                            />
+                            <input
+                                type="text"
+                                placeholder="Country"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
+                                value={currentAddress.country}
+                                onChange={(e) =>
+                                    setCurrentAddress({ ...currentAddress, country: e.target.value })
+                                }
+                            />
+
+                            {/* Zip */}
+                            <input
+                                type="text"
+                                placeholder="Postal Code"
+                                className="border bg-[#F2F2F2] p-2 rounded w-full"
+                                value={currentAddress.zip}
+                                onChange={(e) =>
+                                    setCurrentAddress({ ...currentAddress, zip: e.target.value })
                                 }
                             />
 
@@ -240,13 +298,11 @@ export default function Address() {
                                     { label: "home", icon: <MdHome /> },
                                     { label: "work", icon: <MdWork /> },
                                     { label: "other", icon: <MdLocationOn /> },
-                                ].map((opt) => (
+                                ].map(opt => (
                                     <button
                                         key={opt.label}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-full border ${currentAddress.type === opt.label
-                                            ? "btn-gradient text-white"
-                                            : "text-gray-600"
-                                            }`}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-full border 
+                    ${currentAddress.type === opt.label ? "btn-gradient text-white" : "text-gray-600"}`}
                                         onClick={() =>
                                             setCurrentAddress({ ...currentAddress, type: opt.label })
                                         }
@@ -264,6 +320,7 @@ export default function Address() {
                             </button>
 
                         </div>
+
                     </div>
                 </div>
             )}

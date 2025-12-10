@@ -39,10 +39,12 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
         const { data, error } = await supabase.rpc("upsert_user_cart", {
             p_product_id: product.id,
             p_quantity: 1,
-            p_address_id: "4ddc8965-4c11-4b3f-9c25-7d36cd88ff3c",
-            p_delete_product_id: product.id,
+            p_address_id: null,
+            p_delete_product_id: null,
         });
-
+        if (data.status == 'success') {
+            setOpenCart(true)
+        }
         console.log(data, error);
     };
 
@@ -121,7 +123,6 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
                     <button
                         onClick={() => {
                             addToCart();
-                            setOpenCart(true);
                         }}
                         className="btn-gradient text-white font-medium px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-red-700"
                     >
