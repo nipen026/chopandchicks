@@ -1,20 +1,59 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { FiBox } from "react-icons/fi";
 import { PiKnifeBold } from "react-icons/pi";
 import { LuUsers } from "react-icons/lu";
 import { BsBookmark, BsArrowRepeat } from "react-icons/bs";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { supabase } from "../../lib/supabaseClient";
 
-export default function ProductDetailInfo({ setOpenCart }) {
+export default function ProductDetailInfo({ setOpenCart, product }) {
+    const [userId, setUserId] = useState("");
+
+    // ✔ FIX: load userId safely on client
+    useEffect(() => {
+        const id = localStorage.getItem("user_account_id");
+        if (id) setUserId(id);
+    }, []);
+
+    const addToCart = async () => {
+        if (!product?.id) return;
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Check user_account record
+        // const { data: user_account, error: uaError } = await supabase
+        //     .from("user_account")
+        //     .select("*")
+        //     .eq("id", userId)      // or eq("auth_id", user.id)
+        //     .single();
+
+        // if (!user_account) {
+        //     console.log("User not found in user_account table");
+        //     return;
+        // }
+
+        const { data, error } = await supabase.rpc("upsert_user_cart", {
+            p_product_id: product.id,
+            p_quantity: 1,
+            p_address_id: "4ddc8965-4c11-4b3f-9c25-7d36cd88ff3c",
+            p_delete_product_id: product.id,
+        });
+
+        console.log(data, error);
+    };
+
+
     return (
         <div className="container rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-10 shadow-sm">
 
             {/* Left - Image */}
             <div className="md:w-1/2 w-full">
                 <Image
-                    src="/assets/product_detail.png"     // replace with real image
+                    src={product?.image?.image_url}
                     width={500}
                     height={500}
                     alt="product"
@@ -22,13 +61,13 @@ export default function ProductDetailInfo({ setOpenCart }) {
                 />
             </div>
 
-            {/* Right - Content */}
-            <div className="flex flex-col justify-between md:w-1/2 w-full">
+            {/* Right */}
+            <div className="flex flex-col md:w-1/2 w-full">
 
-                {/* Title + Icons */}
+                {/* Title */}
                 <div className="flex justify-between items-start">
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-800 leading-snug">
-                        Chicken Breast - Boneless
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+                        {product?.name}
                     </h2>
 
                     <div className="flex items-center space-x-4 text-xl">
@@ -43,42 +82,49 @@ export default function ProductDetailInfo({ setOpenCart }) {
 
                 {/* Tags */}
                 <div className="flex flex-wrap items-center gap-3 mt-4">
-                    <span className="flex items-center gap-2 bg-[#EDEDED] px-3 py-1.5 rounded-lg text-sm font-medium border text-gray-700">
-                        <FiBox /> 500 g
+                    <span className="flex items-center gap-2 bg-[#EDEDED] px-3 py-1.5 rounded-lg text-sm border text-gray-700">
+                        <FiBox /> {product?.weight_in_kg} Kg
                     </span>
 
-                    <span className="flex items-center gap-2 bg-[#EDEDED] px-3 py-1.5 rounded-lg text-sm font-medium border text-gray-700">
-                        <PiKnifeBold /> 4-8 Pieces
+                    <span className="flex items-center gap-2 bg-[#EDEDED] px-3 py-1.5 rounded-lg text-sm border text-gray-700">
+                        <PiKnifeBold /> {product?.quantity} Pieces
                     </span>
 
-                    <span className="flex items-center gap-2 bg-[#EDEDED] px-3 py-1.5 rounded-lg text-sm font-medium border text-gray-700">
-                        <LuUsers /> Serves 2
+                    <span className="flex items-center gap-2 bg-[#EDEDED] px-3 py-1.5 rounded-lg text-sm border text-gray-700">
+                        <LuUsers /> Serves {product?.servings}
                     </span>
                 </div>
 
                 {/* Description */}
-                <div className="mt-6 space-y-3 text-gray-700 text-sm leading-6">
-                    <p className="flex items-center gap-2 text-[#37474F]">
-                        <span className="text-xl"><GiHamburgerMenu /></span> Freshly cut and packed today
-                    </p>
-                    <p className="flex items-start gap-2 text-[#37474F]">
+                <div className="mt-6 text-gray-700 text-sm leading-6">
+                    <p className="flex items-start gap-2">
                         <span className="text-xl"><GiHamburgerMenu /></span>
-                        Et quidem faciunt, ut summum bonum sit extremum et rationibus
-                        conquisitis de voluptate. Sed ut summum bonum sit id.
+                        {product?.description}
                     </p>
                 </div>
 
                 {/* Price + Button */}
                 <div className="mt-6 flex items-center justify-between">
                     <div>
-                        <p className="text-red-600 font-bold text-2xl">₹220.00</p>
+                        <p className="text-red-600 font-bold text-2xl">₹{product?.sale_price}</p>
+
                         <div className="flex items-center gap-2">
-                            <p className="text-gray-500 text-sm line-through">₹240.00 </p>
+                            {product?.original_price && (
+                                <p className="text-gray-500 text-sm line-through">
+                                    ₹{product?.original_price}
+                                </p>
+                            )}
                             <p className="text-gray-500 text-xs">(incl. of all taxes)</p>
                         </div>
                     </div>
 
-                    <button onClick={() => setOpenCart(true)} className="btn-gradient hover:bg-red-700 text-white font-medium px-6 py-2.5 rounded-lg flex items-center gap-2 ease-linear">
+                    <button
+                        onClick={() => {
+                            addToCart();
+                            setOpenCart(true);
+                        }}
+                        className="btn-gradient text-white font-medium px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-red-700"
+                    >
                         Add <span className="text-xl font-bold">+</span>
                     </button>
                 </div>

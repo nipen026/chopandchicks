@@ -17,6 +17,7 @@ import ForgotPasswordModal from "../../Components/ForgotPasswordModal/ForgotPass
 import CongratulationModal from "../../Components/CongrarulationModal";
 import Link from "next/link";
 import { LuUserRound } from "react-icons/lu";
+import CreateAccountModal from "../../Components/CreateAccountPopup";
 
 export default function Navbar() {
     const [isSignUp, setIsSignUp] = useState(false);
@@ -25,6 +26,7 @@ export default function Navbar() {
     const [isForgot, setIsForgot] = useState(false);
     const [isLast, setIsLast] = useState(false);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
+    const [createAccountModal,setCreateAccountModal] = useState()
     const [phoneNumber, setPhoneNumber] = useState()
     const [openMenu, setOpenMenu] = useState(false);
     let authToken = ''
@@ -33,7 +35,7 @@ export default function Navbar() {
     }
 
     return (
-        <div className="sticky container mt-5 top-0 z-[999]">
+        <div className="sticky container mt-5 top-0 ">
 
             {/* NAVBAR */}
             <div className="w-full bg-white shadow-md py-3 px-4 md:px-6 md:rounded-full rounded-2xl ">
@@ -118,11 +120,11 @@ export default function Navbar() {
                             </div>
                             :
                             <button
-                                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-full font-medium"
+                                className="flex items-center gap-2 bg-red-600 text-white ps-4 pe-1 py-1 rounded-full font-medium"
                                 onClick={() => setIsLogin(true)}
                             >
                                 Login
-                                <span className="bg-white text-red-600 rounded-full p-1 px-2 text-sm">
+                                <span className="bg-white text-red-600 rounded-full p-2 text-sm">
                                     <FaArrowRight />
                                 </span>
                             </button>
@@ -214,10 +216,11 @@ export default function Navbar() {
 
             {/* MODALS */}
             <SignupPopup open={isSignUp} onClose={() => setIsSignUp(false)} setIsOtp={setIsOtp} setPhoneNumber={setPhoneNumber} />
-            <OtpVerificationModal open={isOtp} onClose={() => setIsOtp(false)} setIsLast={setIsLast} number={phoneNumber} />
+            <OtpVerificationModal open={isOtp} onClose={() => setIsOtp(false)} setIsLast={setIsLast} number={phoneNumber} setCreateAccountModal={setCreateAccountModal}/>
             <LoginModal open={isLogin} onClose={() => setIsLogin(false)} setIsSignUp={setIsSignUp} setIsForgot={setIsForgot} />
             <ForgotPasswordModal open={isForgot} onClose={() => setIsForgot(false)} setIsSignUp={setIsSignUp} setIsLogin={setIsLogin} setIsLast={setIsLast} />
             <CongratulationModal open={isLast} onClose={() => setIsLast(false)} setIsLogin={setIsLogin} />
+            <CreateAccountModal open={createAccountModal} onClose={()=>setCreateAccountModal(false)} setIsLast={setIsLast}/>
         </div>
     );
 }

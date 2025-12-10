@@ -28,3 +28,19 @@ body {
 .btn-gradient {
   background: linear-gradient(90deg, #FF4B55 0%, #BA3139 100%);
 }
+.productBoxShadow{
+  box-shadow: 5.07px 5.07px 15.2px 0px #00000010;
+}
+.slick-track{
+  padding: 20px 0px;
+}
+@keyframes zoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

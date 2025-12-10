@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
-export default function OtpVerificationModal({ open, onClose, setIsLast,number }) {
+export default function OtpVerificationModal({ open, onClose, setIsLast,number,setCreateAccountModal }) {
     const [show, setShow] = useState(false);
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
@@ -40,7 +40,7 @@ const handleVerifyOtp = async () => {
         console.log("OTP Verified:", data);
         // ✅ success: close modal & mark last step
         onClose();
-        setIsLast(true);
+        setCreateAccountModal(true);
     } catch (err) {
         console.error(err);
         alert("Something went wrong while verifying OTP");

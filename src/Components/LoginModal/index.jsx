@@ -14,7 +14,18 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
     const [phone, setPhone] = useState()
     const [loading, setLoading] = useState(false);
     const [errMsg, setErrMsg] = useState("");
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState('');
+    useEffect(() => {
+        if (open) {
+            document.body.style.overflow = "hidden"; // lock scroll
+        } else {
+            document.body.style.overflow = ""; // unlock scroll
+        }
+
+        return () => {
+            document.body.style.overflow = ""; // cleanup
+        };
+    }, [open]);
 
     useEffect(() => {
         if (open) setTimeout(() => setShow(true), 10);
@@ -53,11 +64,12 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
         });
         if (typeof window !== "undefined") {
             localStorage.setItem("auth-token", data.session.access_token);
+            localStorage.setItem('userId', data.user.id)
         }
         setLoading(false);
 
         if (error) {
-            setErrMsg(error.message); // Supabase error message e.g., "Invalid login credentials"
+            setErrors(error.message); // Supabase error message e.g., "Invalid login credentials"
             return;
         }
 
@@ -90,11 +102,12 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
         });
         if (typeof window !== "undefined") {
             localStorage.setItem("auth-token", data.session.access_token);
+            localStorage.setItem('userId', data.user.id)
         }
         setLoading(false);
 
         if (error) {
-            setErrMsg(error.message); // Supabase error message e.g., "Invalid login credentials"
+            setErrors(error.message); // Supabase error message e.g., "Invalid login credentials"
             return;
         }
 
@@ -118,15 +131,16 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
         <>
             {open && (
                 <div
-                    className={`fixed inset-0 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm z-50
-          transition-opacity duration-300 ${show ? "opacity-100" : "opacity-0"}`}
+                    className={`fixed inset-0 z-50 flex items-center justify-center p-4 
+        bg-black/40 backdrop-blur-sm transition-opacity duration-300 
+        ${show ? "opacity-100" : "opacity-0"}`}
                 >
                     <div
-                        className={`bg-white w-full max-w-md p-8 rounded-2xl shadow-lg border
-            shadow-[0_0_40px_5px_rgba(255,0,0,0.18)] relative transform
-            transition-all duration-300 ease-out
+                        className={`bg-white z-60 w-full max-w-md p-8 rounded-2xl shadow-lg border
+            transition-all duration-300
             ${show ? "scale-100 translate-y-0 opacity-100" : "scale-75 translate-y-5 opacity-0"}`}
                     >
+
                         {/* Close Btn */}
                         <button
                             onClick={onClose}
@@ -164,6 +178,9 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                         {/* Email */}
                         {activeTab == 'email' &&
                             <div>
+                                {errors && (
+                                    <p className="text-red-600 text-sm mb-3 text-center">{errors}</p>
+                                )}
                                 <div className="mb-4">
                                     <label className="block text-sm font-semibold text-black mb-1">Email *</label>
                                     <input
@@ -255,6 +272,9 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                         {activeTab == 'phone' &&
 
                             <div>
+                                {errors && (
+                                    <p className="text-red-600 text-sm mb-3 text-center">{errors}</p>
+                                )}
                                 <div className="mb-4">
                                     <label className="font-semibold text-black text-sm">Mobile No *</label>
                                     <input
