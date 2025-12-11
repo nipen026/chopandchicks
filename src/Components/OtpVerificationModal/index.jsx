@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
+import toast from "react-hot-toast";
 export default function OtpVerificationModal({ open, onClose, setIsLast,number,setCreateAccountModal }) {
     const [show, setShow] = useState(false);
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -23,7 +24,7 @@ export default function OtpVerificationModal({ open, onClose, setIsLast,number,s
     };
 const handleVerifyOtp = async () => {
     const otpCode = otp.join(""); // join 6 digits into one string
-    const phoneNumber = `+91${number}`; // replace with actual number
+    const phoneNumber = number; // replace with actual number
 
     try {
         const { data, error } = await supabase.auth.verifyOtp({
@@ -33,7 +34,7 @@ const handleVerifyOtp = async () => {
         });
 
         if (error) {
-            alert(`OTP Verification Failed: ${error.message}`);
+            toast.error(`OTP Verification Failed: ${error.message}`);
             return;
         }
 
