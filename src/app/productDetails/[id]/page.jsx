@@ -9,7 +9,7 @@ import ProductDetailInfo from "../../../Components/ProductDetailInfo";
 import { supabase } from "../../../lib/supabaseClient";
 
 export default function ProductDetails() {
-    const [openCart, setOpenCart] = useState(true);
+    const [openCart, setOpenCart] = useState(false);
     const {id} = useParams();
     const [product, setProduct] = useState(null);
     
