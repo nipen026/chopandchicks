@@ -2,25 +2,28 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
-// React Icons
+// Icons
 import { FiMail, FiPhone, FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
+
+// Phone Input
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber }) {
+// Toast
+import { toast } from "react-hot-toast";
+
+export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, setIsLast }) {
   const [showPopup, setShowPopup] = useState(false);
 
   // Tabs
   const [activeTab, setActiveTab] = useState("email");
 
-  // Email fields
+  // Fields
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  // Phone fields
-  const [phone, setPhone] = useState("");
 
   // UI State
   const [loading, setLoading] = useState(false);
@@ -30,13 +33,26 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
 
   // Popup animation
   useEffect(() => {
-    if (open) setTimeout(() => setShowPopup(true), 20);
-    else setShowPopup(false);
+    if (open) {
+      setTimeout(() => setShowPopup(true), 20);
+    } else {
+      setShowPopup(false);
+      handleReset();
+    }
   }, [open]);
 
-  // ------------------------
-  // VALIDATIONS
-  // ------------------------
+  // Reset all fields
+  const handleReset = () => {
+    setEmail("");
+    setPhone("");
+    setPassword("");
+    setConfirmPassword("");
+    setErrors({});
+  };
+
+  // --------------------------------
+  // Email Validation
+  // --------------------------------
   const validateEmailForm = () => {
     const errs = {};
 
@@ -44,22 +60,23 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
     else if (!/^\S+@\S+\.\S+$/.test(email)) errs.email = "Invalid email";
 
     if (!password) errs.password = "Password is required";
-    if (password.length < 6) errs.password = "Password must be 6+ chars";
+    else if (password.length < 6) errs.password = "Password must be 6+ chars";
 
     if (!confirmPassword) errs.confirmPassword = "Confirm password";
-    if (password !== confirmPassword)
-      errs.confirmPassword = "Passwords do not match";
+    else if (password !== confirmPassword) errs.confirmPassword = "Passwords do not match";
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
+  // --------------------------------
+  // Phone Validation
+  // --------------------------------
   const validatePhoneForm = () => {
     const errs = {};
 
-    // react-phone-input-2 returns full international number => extract last 10 digits
-    const cleanedPhone = phone.replace(/\D/g, "");
-    const last10 = cleanedPhone.slice(-10);
+    const clean = phone.replace(/\D/g, "");
+    const last10 = clean.slice(-10);
 
     if (!phone) errs.phone = "Phone number required";
     else if (!/^[6-9]\d{9}$/.test(last10)) errs.phone = "Invalid phone number";
@@ -68,9 +85,9 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
     return Object.keys(errs).length === 0;
   };
 
-  // ------------------------
+  // --------------------------------
   // EMAIL SIGNUP
-  // ------------------------
+  // --------------------------------
   const handleEmailSignup = async () => {
     if (!validateEmailForm()) return;
 
@@ -81,60 +98,48 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
       password,
     });
 
-    if (error) {
-      setLoading(false);
-      return setErrors({ api: error.message });
-    }
-
-    const user = data?.user;
-    if (!user) {
-      setLoading(false);
-      return setErrors({ api: "Signup failed. Try again." });
-    }
-
-    // Check if user_account exists
-    const { data: user_account } = await supabase
-      .from("user_account")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    // Create user_account if missing
-    if (!user_account) {
-      await supabase.from("user_account").insert({
-        id: user.id,
-        email: user.email,
-      });
-    }
-
-    // Save local
-    localStorage.setItem("user_account_id", user.id);
-
     setLoading(false);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    toast.success("Account created! Check your mail.");
+    setIsLast(true);
+
     onClose();
+    handleReset();
   };
 
-  // ------------------------
-  // PHONE SIGNUP
-  // ------------------------
+  // --------------------------------
+  // PHONE OTP SIGNUP
+  // --------------------------------
   const handleSendOtp = async () => {
     if (!validatePhoneForm()) return;
 
     setLoading(true);
 
-    let { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       phone: `+${phone}`,
     });
 
-    setPhoneNumber(phone);
     setLoading(false);
 
-    if (error) return setErrors({ api: error.message });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
 
+    toast.success("OTP sent successfully!");
+
+    setPhoneNumber(phone);
     setIsOtp(true);
     onClose();
+    handleReset();
   };
 
+  // Google Login
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -145,14 +150,12 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
     <>
       {open && (
         <div
-          className={`fixed z-[999] inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300 ${
-            showPopup ? "opacity-100" : "opacity-0"
-          }`}
+          className={`fixed z-[999] inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300 
+            ${showPopup ? "opacity-100" : "opacity-0"}`}
         >
           <div
-            className={`bg-white w-full z-[999] max-w-md mx-4 p-8 rounded-3xl shadow-lg transition-all duration-300 transform ${
-              showPopup ? "scale-100" : "scale-90"
-            }`}
+            className={`bg-white w-full max-w-md mx-4 p-8 rounded-3xl shadow-lg transition-all duration-300 transform 
+            ${showPopup ? "scale-100" : "scale-90"}`}
           >
             {/* Close */}
             <button
@@ -164,62 +167,53 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
 
             {/* Logo */}
             <div className="flex justify-center mb-4">
-              <img
-                src="/assets/footer_logo.png"
-                alt="logo"
-                className="w-28 h-28 object-cover"
-              />
+              <img src="/assets/footer_logo.png" alt="logo" className="w-28 h-28 object-cover" />
             </div>
 
             {/* Tabs */}
             <div className="grid grid-cols-2 mb-6 gap-10 pb-2">
               <button
                 onClick={() => setActiveTab("email")}
-                className={`justify-center flex items-center gap-2 pb-2 ${
-                  activeTab === "email"
-                    ? "text-red-600 border-b-2 border-red-600"
-                    : "text-gray-500"
-                }`}
+                className={`justify-center flex items-center gap-2 pb-2 
+                ${activeTab === "email" ? "text-red-600 border-b-2 border-red-600" : "text-gray-500"}`}
               >
                 <FiMail size={18} /> Email
               </button>
 
               <button
                 onClick={() => setActiveTab("phone")}
-                className={`flex items-center justify-center gap-2 pb-2 ${
-                  activeTab === "phone"
-                    ? "text-red-600 border-b-2 border-red-600"
-                    : "text-gray-500"
-                }`}
+                className={`flex items-center justify-center gap-2 pb-2 
+                ${activeTab === "phone" ? "text-red-600 border-b-2 border-red-600" : "text-gray-500"}`}
               >
                 <FiPhone size={18} /> Phone
               </button>
             </div>
 
+            {/* Errors */}
             {errors.api && <p className="text-red-500 text-sm mb-3">{errors.api}</p>}
 
-            {/* ---------------------- EMAIL FORM ------------------------ */}
+            {/* EMAIL FORM */}
             {activeTab === "email" && (
               <>
+                {/* Email */}
                 <div className="mb-4">
                   <label className="font-semibold text-black text-sm">Email *</label>
                   <input
                     type="email"
-                    className="w-full mt-1 text-black px-4 py-3 border focus:border-red-500 outline-none transition rounded-xl"
-                    placeholder="Enter Your email"
+                    className="w-full mt-1 text-black px-4 py-3 border focus:border-red-500 outline-none rounded-xl"
+                    placeholder="Enter email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                  )}
+                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                 </div>
 
+                {/* Password */}
                 <div className="mb-4 relative">
                   <label className="font-semibold text-black text-sm">Password *</label>
                   <input
                     type={showPass ? "text" : "password"}
-                    className="w-full mt-1 px-4 py-3 border focus:border-red-500 outline-none transition rounded-xl"
+                    className="w-full mt-1 px-4 py-3 border rounded-xl outline-none focus:border-red-500"
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -230,19 +224,16 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                   >
                     {showPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                   </span>
-                  {errors.password && (
-                    <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                  )}
+                  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
                 </div>
 
+                {/* Confirm Password */}
                 <div className="mb-6 relative">
-                  <label className="font-semibold text-black text-sm">
-                    Confirm Password *
-                  </label>
+                  <label className="font-semibold text-black text-sm">Confirm Password *</label>
                   <input
                     type={showConfirmPass ? "text" : "password"}
-                    className="w-full mt-1 px-4 py-3 border focus:border-red-500 outline-none transition rounded-xl"
-                    placeholder="Confirm your password"
+                    className="w-full mt-1 px-4 py-3 border rounded-xl outline-none focus:border-red-500"
+                    placeholder="Confirm password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
@@ -253,37 +244,39 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                     {showConfirmPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                   </span>
                   {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.confirmPassword}
-                    </p>
+                    <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
                   )}
                 </div>
 
+                {/* Submit */}
                 <button
-                  className="w-full btn-gradient text-white font-semibold py-3 rounded-full text-lg"
+                  className="w-full btn-gradient text-white font-semibold py-3 rounded-full text-lg flex justify-center items-center gap-2"
                   disabled={loading}
                   onClick={handleEmailSignup}
                 >
+                  {loading && <span className="loader"></span>}
                   {loading ? "Creating..." : "Sign Up"}
                 </button>
 
+                {/* Google */}
                 <div className="flex justify-center mt-4">
                   <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition">
                     <FcGoogle size={40} />
                   </button>
                 </div>
 
+                {/* Terms */}
                 <div className="text-center text-black mt-5">
                   <p>By registering, you agree to our</p>
                   <p>
-                    <a href="/" className="text-primary underline">Terms of services</a> and{" "}
+                    <a href="/" className="text-primary underline">Terms of service</a> and{" "}
                     <a href="/" className="text-primary underline">Privacy Policy</a>
                   </p>
                 </div>
               </>
             )}
 
-            {/* ---------------------- PHONE FORM ------------------------ */}
+            {/* PHONE FORM */}
             {activeTab === "phone" && (
               <>
                 <div className="mb-4">
@@ -298,29 +291,31 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber })
                     dropdownClass="text-black"
                     placeholder="Enter Mobile Number"
                   />
-                  {errors.phone && (
-                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                  )}
+                  {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                 </div>
 
+                {/* Send OTP */}
                 <button
-                  className="w-full btn-gradient text-white font-semibold py-3 rounded-full text-lg"
+                  className="w-full btn-gradient text-white font-semibold py-3 rounded-full text-lg flex justify-center items-center gap-2"
                   disabled={loading}
                   onClick={handleSendOtp}
                 >
+                  {loading && <span className="loader"></span>}
                   {loading ? "Sending OTP..." : "Send OTP"}
                 </button>
 
+                {/* Google Login */}
                 <div className="flex justify-center mt-4">
                   <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition">
                     <FcGoogle size={40} />
                   </button>
                 </div>
 
+                {/* Terms */}
                 <div className="text-center text-black mt-5">
                   <p>By registering, you agree to our</p>
                   <p>
-                    <a href="/" className="text-primary underline">Terms of services</a> and{" "}
+                    <a href="/" className="text-primary underline">Terms of service</a> and{" "}
                     <a href="/" className="text-primary underline">Privacy Policy</a>
                   </p>
                 </div>

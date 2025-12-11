@@ -76,7 +76,7 @@ export default function BestsellerSection({ title, desc }) {
     }, []);
     const settings = {
         infinite: false,
-        slidesToShow: 5,
+        slidesToShow: 6,
         slidesToScroll: 1,
         nextArrow: <NextArrow />,
         prevArrow: <PrevArrow />,
@@ -101,7 +101,7 @@ export default function BestsellerSection({ title, desc }) {
             </p>
 
             <div className="">
-                <Slider {...settings} className="gap-8">
+                <Slider {...settings} className="!gap-20">
                     {products.map((item, index) => (
                         <div key={index} className="px-2">
                             <ProductCard item={item} />

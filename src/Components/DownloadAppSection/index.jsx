@@ -51,7 +51,7 @@ export default function DownloadAppSection() {
             alt="App Screen"
             width={500}
             height={200}
-            className="rounded-xl w-fit   fit-cover  z-10"
+            className="rounded-xl w-fit  fit-cover  z-10"
           />
 
        

@@ -4,6 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
 import { FiMail, FiPhone } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 
 export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) {
@@ -38,82 +39,51 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
     const handleLogin = async () => {
         setErrMsg("");
 
-        // Validation
-        if (!email.trim()) {
-            setErrMsg("Email is required.");
-            return;
-        }
-        if (!/^\S+@\S+\.\S+$/.test(email)) {
-            setErrMsg("Please enter a valid email address.");
-            return;
-        }
-        if (!password) {
-            setErrMsg("Password is required.");
-            return;
-        }
-        if (password.length < 6) {
-            setErrMsg("Password must be at least 6 characters long.");
-            return;
-        }
+        if (!email.trim()) return setErrMsg("Email is required.");
+        if (!/^\S+@\S+\.\S+$/.test(email)) return setErrMsg("Invalid email.");
+        if (!password) return setErrMsg("Password is required.");
 
         setLoading(true);
-
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-        if (typeof window !== "undefined") {
-            localStorage.setItem("auth-token", data.session.access_token);
-            localStorage.setItem('userId', data.user.id)
-        }
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         setLoading(false);
 
         if (error) {
-            setErrors(error.message); // Supabase error message e.g., "Invalid login credentials"
-            return;
+            toast.error(error.message);
+            return setErrors(error.message);
         }
 
-        // Success
+        toast.success("Login successful 🎉");
+        localStorage.setItem("auth-token", data.session.access_token);
+        localStorage.setItem("userId", data.user.id);
+
         onClose();
     };
+
     const handlePhoneLogin = async () => {
         setErrMsg("");
 
-        // Validation
-        if (!phone.trim()) {
-            setErrMsg("Email is required.");
-            return;
-        }
-
-        if (!password) {
-            setErrMsg("Password is required.");
-            return;
-        }
-        if (password.length < 6) {
-            setErrMsg("Password must be at least 6 characters long.");
-            return;
-        }
+        if (!phone.trim()) return setErrMsg("Phone Number is required.");
+        if (!password) return setErrMsg("Password is required.");
 
         setLoading(true);
-
         const { data, error } = await supabase.auth.signInWithPassword({
             phone: `+91${phone}`,
             password,
         });
-        if (typeof window !== "undefined") {
-            localStorage.setItem("auth-token", data.session.access_token);
-            localStorage.setItem('userId', data.user.id)
-        }
         setLoading(false);
 
         if (error) {
-            setErrors(error.message); // Supabase error message e.g., "Invalid login credentials"
-            return;
+            toast.error(error.message);
+            return setErrors(error.message);
         }
 
-        // Success
+        toast.success("Login successful 🎉");
+        localStorage.setItem("auth-token", data.session.access_token);
+        localStorage.setItem("userId", data.user.id);
+
         onClose();
     };
+
     // ---------------------------
     // Google Login Handler
     // ---------------------------
@@ -227,10 +197,14 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                         disabled={loading}
                                         onClick={handleLogin}
                                         className={`w-[264px] btn-gradient hover:bg-red-700 text-white font-semibold
-                py-3 rounded-full transition mb-4 ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
-                                    >
+                                        py-3 rounded-full transition mb-4 flex items-center justify-center gap-2
+                                        ${loading ? "opacity-60 cursor-not-allowed" : ""}`}>
+                                        {loading && (
+                                            <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                        )}
                                         {loading ? "Logging in..." : "Login"}
                                     </button>
+
                                 </div>
 
                                 {/* Sign Up Switch */}
@@ -321,10 +295,14 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                         disabled={loading}
                                         onClick={handlePhoneLogin}
                                         className={`w-[264px] btn-gradient hover:bg-red-700 text-white font-semibold
-                py-3 rounded-full transition mb-4 ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
-                                    >
+                                        py-3 rounded-full transition mb-4 flex items-center justify-center gap-2
+                                        ${loading ? "opacity-60 cursor-not-allowed" : ""}`}>
+                                        {loading && (
+                                            <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                        )}
                                         {loading ? "Logging in..." : "Login"}
                                     </button>
+
                                 </div>
 
                                 {/* Sign Up Switch */}
