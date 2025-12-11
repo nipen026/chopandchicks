@@ -37,7 +37,7 @@ export default function Navbar() {
     }, [])
 
     return (
-        <div className="sticky container mt-5 top-0 ">
+        <div className="z-[999] sticky container mt-5 top-0 ">
 
             {/* NAVBAR */}
             <div className="w-full bg-white shadow-md py-3 px-4 md:px-6 md:rounded-full rounded-2xl ">
@@ -193,7 +193,7 @@ export default function Navbar() {
                                 <AiOutlineShopping className="text-2xl" />
                                 Cart
                             </div>
-                            {authToken ?
+                            {token ?
                                 <div className="flex items-center gap-2 text-gray-700 cursor-pointer" onClick={() => { window.location.href = '/userProfile' }}>
                                     <LuUserRound className="text-xl font-bold" />
                                     <span>Profile</span>
