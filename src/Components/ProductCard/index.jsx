@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-export default function ProductCard({ item }) {
+export default function ProductCard({ item,page }) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -8,7 +8,9 @@ export default function ProductCard({ item }) {
     router.push(`/productDetails/${item.id}`);
   }
   return (
-    <div className="lg:min-w-[200px]  min-w-full productBoxShadow  lg:max-w-[230px] max-w-full h-full   border-[1px] border-[#848181] bg-white rounded-[28px] cursor-pointer  p-3 hover:shadow-lg transition-all duration-300">
+    <div className={`${page == 'category' ? 
+    "  min-w-full productBoxShadow  max-w-full h-full   border-[1px] border-[#848181] bg-white rounded-[28px] cursor-pointer  p-3 hover:shadow-lg transition-all duration-300" : 
+    "lg:min-w-[200px]  min-w-full productBoxShadow  lg:max-w-[230px] max-w-full h-full   border-[1px] border-[#848181] bg-white rounded-[28px] cursor-pointer  p-3 hover:shadow-lg transition-all duration-300"}`}>
       <div className="w-full h-36 rounded-[28px] overflow-hidden" onClick={() => handleClick()}>
         <Image
           src={item.image.thumbnail_url}

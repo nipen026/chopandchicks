@@ -61,7 +61,6 @@ export default function CartSidebar({ open, onClose }) {
 
         fetchCart();
     }, [open]);
-
     // Increase Quantity
     const increaseQty = async (id) => {
         setItems(prev =>

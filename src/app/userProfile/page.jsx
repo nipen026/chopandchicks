@@ -5,6 +5,7 @@ import { FaUpload, FaUser } from "react-icons/fa";
 import { IoBagCheck } from "react-icons/io5";
 import { MdOutlineLogout } from "react-icons/md";
 import { supabase } from "../../lib/supabaseClient";
+import toast from "react-hot-toast";
 
 export default function ProfilePage() {
   const [active, setActive] = useState("profile");
@@ -68,10 +69,12 @@ export default function ProfilePage() {
   };
 
   // ---------------- Logout ----------------
-  const handleLogout = () => {
+  const handleLogout = async() => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth-token");
       window.location.href = "/";
+      let { error } = await supabase.auth.signOut();
+      toast.error(error.message);
     }
   };
 

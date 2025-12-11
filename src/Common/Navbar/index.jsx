@@ -20,7 +20,7 @@ import ForgotPasswordModal from "../../Components/ForgotPasswordModal/ForgotPass
 import CongratulationModal from "../../Components/CongrarulationModal";
 import CreateAccountModal from "../../Components/CreateAccountPopup";
 
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export default function Navbar() {
     const [isSignUp, setIsSignUp] = useState(false);
@@ -37,7 +37,19 @@ export default function Navbar() {
 
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    useEffect(() => {
+        const loginParam = searchParams.get("login");        
+        if (loginParam === "true") {
+            setIsLogin(true);
 
+            // Remove the query param without refreshing
+            const newParams = new URLSearchParams(searchParams.toString());
+            newParams.delete("login");
+
+            router.replace(`${pathname}?${newParams.toString()}`, { scroll: false });
+        }
+    }, [searchParams]);
     // 🟢 Auto-refresh token after login
     useEffect(() => {
         const handleStorageChange = () => {
@@ -127,11 +139,11 @@ export default function Navbar() {
                     <div className="hidden lg:flex items-center gap-8">
                         <Link
                             href="/"
-                            className={`flex items-center gap-2 ${pathname === "/" ? "text-primary" : "text-gray-700"
+                            className={`flex items-center gap-2 ${pathname === "/" ? "text-primary font-medium" : "text-gray-700"
                                 }`}
                         >
                             <HiOutlineHome className="text-xl" />
-                            <span className="font-medium">Home</span>
+                            <span>Home</span>
                         </Link>
 
                         <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-primary">
@@ -139,14 +151,14 @@ export default function Navbar() {
                             <span>Orders</span>
                         </div>
 
-                        <div className={`flex items-center hover:text-primary gap-2 cursor-pointer ${pathname === "/cart" ? "text-primary" : "text-gray-700"}`}  onClick={() => router.push("/cart")}>
+                        <div className={`flex items-center hover:text-primary gap-2 cursor-pointer ${pathname === "/cart" ? "text-primary font-medium" : "text-gray-700"}`} onClick={() => router.push("/cart")}>
                             <AiOutlineShopping className="text-xl" />
                             <span>Cart</span>
                         </div>
 
                         {token ? (
                             <div
-                                className={`flex items-center gap-2 cursor-pointer ${pathname === "/userProfile" ? "text-primary" : "text-gray-700"
+                                className={`flex items-center gap-2 cursor-pointer ${pathname === "/userProfile" ? "text-primary font-medium" : "text-gray-700"
                                     }`}
                                 onClick={() => router.push("/userProfile")}
                             >
@@ -205,7 +217,7 @@ export default function Navbar() {
                 <div className="flex flex-col gap-6 text-gray-700">
                     <Link
                         href="/"
-                        className={`flex items-center gap-3 text-lg ${pathname === "/" ? "text-primary" : "text-gray-700"
+                        className={`flex items-center gap-3 text-lg ${pathname === "/" ? "text-primary font-medium" : "text-gray-700"
                             }`}
                         onClick={() => setOpenMenu(false)}
                     >
@@ -218,7 +230,7 @@ export default function Navbar() {
                         Orders
                     </div>
 
-                    <div className={`flex  ${pathname === "/cart" ? "text-primary" : "text-gray-700"} items-center gap-3 text-lg`} onClick={() => {
+                    <div className={`flex  ${pathname === "/cart" ? "text-primary font-medium" : "text-gray-700"} items-center gap-3 text-lg`} onClick={() => {
                         setOpenMenu(false);
                         router.push("/cart");
                     }}>
@@ -228,7 +240,7 @@ export default function Navbar() {
 
                     {token ? (
                         <div
-                            className="flex items-center gap-3 text-lg cursor-pointer"
+                            className={`flex  ${pathname === "/userProfile" ? "text-primary font-medium" : "text-gray-700"} items-center gap-3 text-lg`}
                             onClick={() => {
                                 setOpenMenu(false);
                                 router.push("/userProfile");

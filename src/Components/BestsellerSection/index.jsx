@@ -76,7 +76,7 @@ export default function BestsellerSection({ title, desc }) {
     }, []);
     const settings = {
         infinite: false,
-        slidesToShow: 6,
+        slidesToShow: 5,
         slidesToScroll: 1,
         nextArrow: <NextArrow />,
         prevArrow: <PrevArrow />,

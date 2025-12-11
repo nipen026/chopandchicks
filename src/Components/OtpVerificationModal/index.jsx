@@ -2,65 +2,123 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import toast from "react-hot-toast";
-export default function OtpVerificationModal({ open, onClose, setIsLast,number,setCreateAccountModal }) {
+
+export default function OtpVerificationModal({
+    open,
+    onClose,
+    setIsLast,
+    number,
+    setCreateAccountModal
+}) {
     const [show, setShow] = useState(false);
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const [timer, setTimer] = useState(30);
+    const [canResend, setCanResend] = useState(false);
 
-    // Animation control
+    // Open/Close animation + reset OTP when closing
     useEffect(() => {
-        if (open) setTimeout(() => setShow(true), 10);
-        else setShow(false);
+        if (open) {
+            setTimeout(() => setShow(true), 10);
+            startCountdown();
+        } else {
+            setShow(false);
+            setOtp(["", "", "", "", "", ""]);
+            setTimer(30);
+            setCanResend(false);
+        }
     }, [open]);
 
-    // Auto move to next input
+    // Start countdown
+    const startCountdown = () => {
+        setTimer(30);
+        setCanResend(false);
+
+        let interval = setInterval(() => {
+            setTimer((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    setCanResend(true);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+    };
+
+    // Handle OTP change
     const handleChange = (value, index) => {
         if (value.length > 1) return;
+
         const updated = [...otp];
         updated[index] = value;
         setOtp(updated);
 
-        const next = document.getElementById(`otp-${index + 1}`);
+        let next = document.getElementById(`otp-${index + 1}`);
         if (value && next) next.focus();
     };
-const handleVerifyOtp = async () => {
-    const otpCode = otp.join(""); // join 6 digits into one string
-    const phoneNumber = number; // replace with actual number
 
-    try {
-        const { data, error } = await supabase.auth.verifyOtp({
-            phone: phoneNumber,
-            token: otpCode,
-            type: "sms"
-        });
+    // Verify OTP
+    const handleVerifyOtp = async () => {
+        const otpCode = otp.join("");
 
-        if (error) {
-            toast.error(`OTP Verification Failed: ${error.message}`);
+        if (otpCode.length !== 6) {
+            toast.error("Please enter all 6 digits");
             return;
         }
 
-        console.log("OTP Verified:", data);
-        // ✅ success: close modal & mark last step
-        onClose();
-        setCreateAccountModal(true);
-    } catch (err) {
-        console.error(err);
-        alert("Something went wrong while verifying OTP");
-    }
-};
+        try {
+            const { data, error } = await supabase.auth.verifyOtp({
+                phone: number,
+                token: otpCode,
+                type: "sms",
+            });
+
+            if (error) {
+                toast.error(error.message);
+                return;
+            }
+
+            toast.success("OTP verified successfully!");
+
+            onClose();
+            setCreateAccountModal(true);
+
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        }
+    };
+
+    // Resend OTP
+    const handleResendOtp = async () => {
+        if (!canResend) return;
+
+        const { error } = await supabase.auth.signInWithOtp({
+            phone: `+${number}`,
+        });
+
+        if (error) {
+            toast.error(error.message);
+            return;
+        }
+
+        toast.success("OTP resent successfully!");
+
+        startCountdown(); // restart timer
+    };
+
     return (
         <>
             {open && (
                 <div
                     className={`fixed inset-0 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm
-                        z-50 transition-opacity duration-300 ${show ? "opacity-100" : "opacity-0"
-                        }`}
+                    z-50 transition-opacity duration-300 ${show ? "opacity-100" : "opacity-0"}`}
                 >
-                    {/* OTP Box */}
                     <div
                         className={`bg-white w-full max-w-md p-8 rounded-2xl shadow-lg border
-                                shadow-[0_0_40px_5px_rgba(255,0,0,0.18)] relative transform
-                                transition-all duration-300 ease-out
-                                ${show ? "scale-100 translate-y-0 opacity-100" : "scale-75 translate-y-5 opacity-0"}`}
+                        shadow-[0_0_40px_5px_rgba(255,0,0,0.18)] relative transform
+                        transition-all duration-300 ease-out
+                        ${show ? "scale-100 translate-y-0 opacity-100" : "scale-75 translate-y-5 opacity-0"}`}
                     >
                         {/* Close */}
                         <button
@@ -71,7 +129,10 @@ const handleVerifyOtp = async () => {
                         </button>
 
                         {/* Title */}
-                        <h2 className="text-center text-3xl font-semibold text-black">Verify OTP</h2>
+                        <h2 className="text-center text-3xl font-semibold text-black">
+                            Verify OTP
+                        </h2>
+
                         <p className="text-center text-gray-500 text-sm mb-6">
                             Enter the 6-digit code sent to your number
                         </p>
@@ -93,15 +154,26 @@ const handleVerifyOtp = async () => {
                         </div>
 
                         {/* Verify Button */}
-                        <button className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold" onClick={() => { handleVerifyOtp() }}>
+                        <button
+                            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold"
+                            onClick={handleVerifyOtp}
+                        >
                             Verify OTP
                         </button>
 
-                        {/* Resend */}
+                        {/* Resend Section */}
                         <p className="text-sm text-gray-600 text-center mt-4">
-                            Didn't receive the code?{" "}
-                            <button className="text-red-600 font-semibold hover:underline">
-                                Resend OTP
+                            Didn’t receive the code?{" "}
+                            <button
+                                disabled={!canResend}
+                                onClick={handleResendOtp}
+                                className={`font-semibold ${
+                                    canResend
+                                        ? "text-red-600 hover:underline"
+                                        : "text-gray-400 cursor-not-allowed"
+                                }`}
+                            >
+                                {canResend ? "Resend OTP" : `Resend in ${timer}s`}
                             </button>
                         </p>
                     </div>

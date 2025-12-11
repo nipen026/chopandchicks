@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const categories = [
   { name: "Mutton", img: "/assets/cat-1.png" },
@@ -10,6 +11,7 @@ const categories = [
 ];
 
 export default function CategorySection() {
+  const router = useRouter()
   return (
     <div className="container bg-[#F5F7FA] py-12 ">
       {/* Heading */}
@@ -21,7 +23,7 @@ export default function CategorySection() {
       {/* Categories Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 text-center">
         {categories.map((item, i) => (
-          <div key={i} className="group cursor-pointer">
+          <div key={i} className="group cursor-pointer" onClick={()=>{router.push(`/Category/${item.name}`)}}>
             <div className="w-32 h-32 mx-auto rounded-full overflow-hidden shadow-md border border-gray-200 transition-transform duration-300 group-hover:scale-105">
               <Image
                 src={item.img}

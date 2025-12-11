@@ -8,10 +8,12 @@ import { LuUsers } from "react-icons/lu";
 import { BsBookmark, BsArrowRepeat } from "react-icons/bs";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { supabase } from "../../lib/supabaseClient";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function ProductDetailInfo({ setOpenCart, product }) {
     const [userId, setUserId] = useState("");
-
+    const router = useRouter();
+    const pathname = usePathname()
     // ✔ FIX: load userId safely on client
     useEffect(() => {
         const id = localStorage.getItem("user_account_id");
@@ -20,9 +22,11 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
 
     const addToCart = async () => {
         if (!product?.id) return;
-
+        
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) {
+            router.push(`${pathname}?login=true`);
+        }
 
         // Check user_account record
         // const { data: user_account, error: uaError } = await supabase

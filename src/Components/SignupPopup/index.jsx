@@ -12,6 +12,7 @@ import "react-phone-input-2/lib/style.css";
 
 // Toast
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, setIsLast }) {
   const [showPopup, setShowPopup] = useState(false);
@@ -30,7 +31,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
   const [errors, setErrors] = useState({});
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
-
+  const router = useRouter()
   // Popup animation
   useEffect(() => {
     if (open) {
@@ -269,8 +270,8 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
                 <div className="text-center text-black mt-5">
                   <p>By registering, you agree to our</p>
                   <p>
-                    <a href="/" className="text-primary underline">Terms of service</a> and{" "}
-                    <a href="/" className="text-primary underline">Privacy Policy</a>
+                   <a href="/terms-of-use" className="text-primary underline" >Terms of service</a> and{" "}
+                    <a href="/privacyPolicy" className="text-primary underline">Privacy Policy</a>
                   </p>
                 </div>
               </>
@@ -315,8 +316,8 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
                 <div className="text-center text-black mt-5">
                   <p>By registering, you agree to our</p>
                   <p>
-                    <a href="/" className="text-primary underline">Terms of service</a> and{" "}
-                    <a href="/" className="text-primary underline">Privacy Policy</a>
+                    <a href="/terms-of-use" className="text-primary underline" >Terms of service</a> and{" "}
+                    <a href="/privacyPolicy" className="text-primary underline">Privacy Policy</a>
                   </p>
                 </div>
               </>
