@@ -8,7 +8,7 @@ export default function DownloadAppSection() {
 
         {/* Left Side Content */}
         <div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl md:text-5xl font-medium text-gray-900 mb-6">
             Download the App
           </h2>
 
@@ -51,7 +51,7 @@ export default function DownloadAppSection() {
             alt="App Screen"
             width={500}
             height={200}
-            className="rounded-xl w-fit  fit-cover  z-10"
+            className="rounded-xl w-fit   fit-cover  z-10"
           />
 
        
