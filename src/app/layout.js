@@ -14,10 +14,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="bg-[#F5F7FA]">
-         <Suspense fallback={null}>
-        <Navbar />
+        <Suspense fallback={null}>
+          <Navbar />
         </Suspense>
-        <Toaster/>
+        <Toaster />
         <main className="">{children}</main>
         <Footer />
       </body>
