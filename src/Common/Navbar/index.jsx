@@ -31,6 +31,10 @@ export default function Navbar() {
     const [token, setToken] = useState(null);
     const [phoneNumber, setPhoneNumber] = useState();
     const [createAccountModal, setCreateAccountModal] = useState(false);
+    const [location, setLocation] = useState({
+        city: "Detecting...",
+        address: "",
+    });
 
     const [openMenu, setOpenMenu] = useState(false);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -39,7 +43,7 @@ export default function Navbar() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     useEffect(() => {
-        const loginParam = searchParams.get("login");        
+        const loginParam = searchParams.get("login");
         if (loginParam === "true") {
             setIsLogin(true);
 
@@ -62,6 +66,61 @@ export default function Navbar() {
         handleStorageChange();
 
         return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            setLocation({
+                city: "Location not supported",
+                address: "",
+            });
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                try {
+                    // Reverse geocoding using OpenStreetMap
+                    const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                    );
+
+                    const data = await res.json();
+
+                    const city =
+                        data.address.city ||
+                        data.address.town ||
+                        data.address.village ||
+                        data.address.state ||
+                        "Unknown location";
+
+                    const address = data.display_name;
+
+                    setLocation({
+                        city,
+                        address,
+                    });
+                } catch (error) {
+                    console.error("Location fetch failed", error);
+                    setLocation({
+                        city: "Unable to fetch",
+                        address: "",
+                    });
+                }
+            },
+            (error) => {
+                console.error("Geolocation error", error);
+                setLocation({
+                    city: "Permission denied",
+                    address: "",
+                });
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+            }
+        );
     }, []);
 
     // 🟢 Sidebar animation
@@ -99,22 +158,24 @@ export default function Navbar() {
                         <div className="block lg:hidden">
                             <div className="flex items-center gap-1 text-gray-700 font-medium text-sm mt-2">
                                 <FaLocationDot className="text-red-600" />
-                                <span>Chennai</span>
+                                <span>{location.city}</span>
                                 <span className="text-xs">▼</span>
                             </div>
                         </div>
+
 
                         {/* Desktop location */}
                         <div className="hidden lg:block">
                             <div className="flex items-center gap-1 text-gray-700 font-medium">
                                 <FaLocationDot className="text-red-600" />
-                                <span>Chennai</span>
+                                <span>{location.city}</span>
                                 <span className="text-sm">▼</span>
                             </div>
-                            <p className="text-xs text-gray-500 w-[200px]">
-                                N35, Varalaxmi Mansion, Jeevan Bima Nagar Main Rd, LIC Colony
+                            <p className="text-xs text-gray-500 w-[220px] line-clamp-2">
+                                {location.address || "Fetching your address..."}
                             </p>
                         </div>
+
                     </div>
 
                     {/* SEARCH BAR DESKTOP */}

@@ -81,7 +81,6 @@ export default function BestsellerSection({ title, desc }) {
         nextArrow: <NextArrow />,
         prevArrow: <PrevArrow />,
         dots: false,
-
         responsive: [
             { breakpoint: 1536, settings: { slidesToShow: 5 } }, // 2xl
             { breakpoint: 1280, settings: { slidesToShow: 4 } }, // xl
