@@ -4,6 +4,7 @@ import { Suspense, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import Navbar from "../Common/Navbar";
 import { Toaster } from "react-hot-toast";
+import Loader from "../Components/Loader";
 
 export default function NavbarClient() {
   useEffect(() => {

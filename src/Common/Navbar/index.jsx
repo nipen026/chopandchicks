@@ -11,7 +11,7 @@ import { LuUserRound } from "react-icons/lu";
 import { RxHamburgerMenu } from "react-icons/rx";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import SignupPopup from "../../Components/SignupPopup";
 import OtpVerificationModal from "../../Components/OtpVerificationModal";
@@ -122,6 +122,18 @@ export default function Navbar() {
             }
         );
     }, []);
+useEffect(() => {
+    if (!token && pathname === "/cart") {
+        // optional: remember where user wanted to go
+        sessionStorage.setItem("redirectAfterLogin", "/cart");
+
+        // open login modal
+        setIsLogin(true);
+
+        // redirect user to home page
+        router.replace("/", { scroll: false });
+    }
+}, [pathname, token, router]);
 
     // 🟢 Sidebar animation
     const sidebarClass = openMenu

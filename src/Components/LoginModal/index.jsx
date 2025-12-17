@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
-import { FiMail, FiPhone } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiMail, FiPhone } from "react-icons/fi";
 import toast from "react-hot-toast";
 
 
@@ -16,6 +16,9 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
     const [loading, setLoading] = useState(false);
     const [errMsg, setErrMsg] = useState("");
     const [errors, setErrors] = useState('');
+    const [showConfirmPass, setShowConfirmPass] = useState(false);
+    const [phonePassword, setPhonepassword] = useState(false);
+
     useEffect(() => {
         if (open) {
             document.body.style.overflow = "hidden"; // lock scroll
@@ -105,20 +108,17 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
             {open && (
                 <div
                     className={`fixed inset-0 z-50 flex items-center justify-center p-4 
-        bg-black/40 backdrop-blur-sm transition-opacity duration-300 
-        ${show ? "opacity-100" : "opacity-0"}`}
-                >
+                    bg-black/40 backdrop-blur-sm transition-opacity duration-300 
+                    ${show ? "opacity-100" : "opacity-0"}`}>
                     <div
                         className={`bg-white z-60 w-full max-w-md p-8 rounded-2xl shadow-lg border
-            transition-all duration-300
-            ${show ? "scale-100 translate-y-0 opacity-100" : "scale-75 translate-y-5 opacity-0"}`}
-                    >
+                        transition-all duration-300
+                        ${show ? "scale-100 translate-y-0 opacity-100" : "scale-75 translate-y-5 opacity-0"}`}>
 
                         {/* Close Btn */}
                         <button
                             onClick={onClose}
-                            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
-                        >
+                            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">
                             ✕
                         </button>
 
@@ -142,9 +142,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                 onClick={() => setActiveTab("phone")}
                                 className={`flex items-center justify-center gap-2 pb-2 ${activeTab === "phone"
                                     ? "text-red-600 border-b-2 border-red-600"
-                                    : "text-gray-500"
-                                    }`}
-                            >
+                                    : "text-gray-500"}`}>
                                 <FiPhone size={18} /> Phone
                             </button>
                         </div>
@@ -162,21 +160,26 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="Enter your email"
                                         className="w-full text-black  border border-gray-300 rounded-lg px-4 py-3
-                focus:border-red-500 outline-none transition"
+                                        focus:border-red-500 outline-none transition"
                                     />
                                 </div>
 
                                 {/* Password */}
-                                <div className="mb-5">
+                                <div className="mb-5 relative">
                                     <label className="block text-sm font-semibold text-black mb-1">Password *</label>
                                     <input
-                                        type="password"
+                                        type={showConfirmPass ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter password"
-                                        className="w-full text-black border border-gray-300 rounded-lg px-4 py-3
-                focus:border-red-500 outline-none transition"
+                                        className="relative w-full text-black border border-gray-300 rounded-lg px-4 py-3
+                                        focus:border-red-500 outline-none transition"
                                     />
+                                    <span
+                                        className="absolute right-4 top-10 cursor-pointer text-gray-500"
+                                        onClick={() => setShowConfirmPass(!showConfirmPass)}>
+                                        {showConfirmPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                    </span>
                                 </div>
 
                                 {/* Error Message */}
@@ -265,16 +268,21 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                 </div>
 
                                 {/* Password */}
-                                <div className="mb-5">
+                                <div className="mb-5 relative">
                                     <label className="block text-sm font-semibold text-black mb-1">Password *</label>
                                     <input
-                                        type="password"
+                                        type={phonePassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter password"
                                         className="w-full text-black border border-gray-300 rounded-lg px-4 py-3
-                focus:border-red-500 outline-none transition"
+                                        focus:border-red-500 outline-none transition"
                                     />
+                                    <span
+                                        className="absolute right-4 top-10 cursor-pointer text-gray-500"
+                                        onClick={() => setPhonepassword(!phonePassword)}>
+                                        {phonePassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                    </span>
                                 </div>
 
                                 {/* Error Message */}

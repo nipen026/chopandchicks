@@ -9,7 +9,7 @@ export default function CategoryCard({ product }) {
         router.push(`/productDetails/${product.id}`);
     }
     return (
-        <div className="w-full bg-white rounded-3xl shadow-[0_4px_25px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden p-4">
+        <div className="w-full bg-white rounded-3xl shadow-[0_4px_25px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden p-4 cursor-pointer">
 
             {/* IMAGE */}
             <div className="w-full h-56 rounded-t-2xl overflow-hidden" onClick={() => handleClick()}>

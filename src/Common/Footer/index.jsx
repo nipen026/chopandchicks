@@ -12,22 +12,24 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 px-6">
 
         {/* Logo + App buttons */}
-        <div>
+        <div className="flex flex-col items-center">
           <Image src="/assets/footer_logo.png" width={80} height={80} alt="logo" className="rounded-full" />
 
-          <p className="mt-4 text-sm">Download the app</p>
-          <div className="flex gap-3 mt-3">
-            <Image src="/assets/playstore.png" width={50} height={30} alt="playstore" />
-            <Image src="/assets/appstore.png" width={50} height={30} alt="appstore" />
+          <div className="flex gap-2 items-center mt-4">
+            <p className=" text-lg">Download the app</p>
+            <div className="flex gap-3">
+              <Image src="/assets/playstore.png" width={30} height={30} alt="playstore" />
+              <Image src="/assets/appstore.png" width={30} height={30} alt="appstore" />
+            </div>
           </div>
         </div>
 
         {/* Company */}
         <div>
-          <h3 className="font-semibold mb-3">Company</h3>
+          <h3 className="font-medium mb-3">Company</h3>
           <ul className="space-y-2 text-sm">
-            <li className="cursor-pointer" onClick={()=>router.push('/about')}>About Us</li>
-            <li className="cursor-pointer" onClick={()=>router.push('/features')}>Features</li>
+            <li className="cursor-pointer" onClick={() => router.push('/about')}>About Us</li>
+            <li className="cursor-pointer" onClick={() => router.push('/features')}>Features</li>
             <li>Refer & Earn</li>
             <li>Support</li>
           </ul>
@@ -35,10 +37,10 @@ export default function Footer() {
 
         {/* Legal */}
         <div>
-          <h3 className="font-semibold mb-3">Legal</h3>
+          <h3 className="font-medium mb-3">Legal</h3>
           <ul className="space-y-2 text-sm">
-            <li className="cursor-pointer" onClick={()=>router.push('/terms-of-use')}>Terms of Use</li>
-            <li className="cursor-pointer" onClick={()=>router.push('/privacyPolicy')}>Privacy Policy</li>
+            <li className="cursor-pointer" onClick={() => router.push('/terms-of-use')}>Terms of Use</li>
+            <li className="cursor-pointer" onClick={() => router.push('/privacyPolicy')}>Privacy Policy</li>
             <li>FAQ</li>
             <li>Community Rules</li>
           </ul>
@@ -46,7 +48,7 @@ export default function Footer() {
 
         {/* Contact */}
         <div>
-          <h3 className="font-semibold mb-3">Contact</h3>
+          <h3 className="font-medium mb-3">Contact</h3>
           <ul className="space-y-2 text-sm">
             <li className="flex items-center gap-2"><FaPhoneAlt /> +91 123456789</li>
             <li className="flex items-center gap-2"><MdEmail /> loremipsum</li>
@@ -55,8 +57,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="text-center text-xs mt-10 opacity-80">
-        © Copyright 2025 Chop and Chicks | All Rights Reserved
+      <div className="text-center text-md mt-5 pt-5 border-[#CD8412] border-t opacity-80">
+        &copy; Copyright 2025 Chop and Chicks | All Rights Reserved
       </div>
     </footer>
   );
