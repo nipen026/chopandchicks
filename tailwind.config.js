@@ -14,7 +14,7 @@ module.exports = {
         base: "#FFF8F8",      // Light background for website
         dark: "#0D0D0E",
         light: "#FAFAFA",
-        black:'#494949'
+        black:'#000000',
       },
       fontFamily: {
         body: ["Inter", "sans-serif"],
