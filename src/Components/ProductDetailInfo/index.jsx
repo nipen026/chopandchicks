@@ -22,7 +22,7 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
 
     const addToCart = async () => {
         if (!product?.id) return;
-        
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             router.push(`${pathname}?login=true`);
@@ -62,6 +62,7 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
                     src={product?.image?.image_url}
                     width={500}
                     height={500}
+                    draggable={false}
                     alt="product"
                     className="rounded-xl w-full h-[340px] object-cover shadow-md"
                 />

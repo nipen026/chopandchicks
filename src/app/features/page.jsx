@@ -52,6 +52,7 @@ export default function Features() {
             >
               <img
                 src={item.img}
+                draggable={false}
                 className="w-full h-full object-cover"
               />
             </div>

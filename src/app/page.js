@@ -47,7 +47,7 @@ export default function Home() {
             <img key={i} src={item?.thumbnail_url} className="w-full h-[300px] object-contain" alt="Banner" />
           ))}
         </Slider> */}
-         <img src="/assets/banner.png" className="w-full"/>
+         <img src="/assets/banner.png" draggable={false} className="w-full"/>
       </div>
 
       <CategorySection />

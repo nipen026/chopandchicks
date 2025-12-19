@@ -22,6 +22,7 @@ export default function About() {
                 <div className="flex justify-center">
                     <img
                         src="/assets/about-banner-1.png"
+                        draggable={false}
                         alt="Fresh Meat"
                         className="rounded-xl shadow-md w-full h-full max-w-md"
                     />
@@ -53,6 +54,7 @@ export default function About() {
                 <div className="flex justify-center">
                     <img
                         src="/assets/about-banner-2.png"
+                        draggable={false}
                         alt="Vendor"
                         className="rounded-xl shadow-md w-full max-w-md"
                     />

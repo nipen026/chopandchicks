@@ -111,6 +111,7 @@ export default function Checkout() {
                         src="/assets/empty-cart.png"
                         width={300}
                         height={300}
+                        draggable={false}
                         alt="Empty Cart"
                     />
                     <p className="text-[#82131B] text-2xl text-center mt-3 font-medium">Start Filling Your Cart with <br /> Premium Fresh Meat.</p>
@@ -136,6 +137,7 @@ export default function Checkout() {
                                             src={item.image}
                                             width={100}
                                             height={100}
+                                            draggable={false}
                                             alt="product"
                                             className="rounded-md object-cover"
                                         />

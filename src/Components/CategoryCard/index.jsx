@@ -18,6 +18,7 @@ export default function CategoryCard({ product }) {
                     alt={product.name}
                     width={400}
                     height={300}
+                    draggable={false}
                     className="w-full h-full object-cover"
                 />
             </div>

@@ -158,6 +158,7 @@ export default function OrderDetails() {
                                     <img
                                         src="https://i.ibb.co/QNDdLDR/pngegg-1.png"
                                         alt="item"
+                                        draggable={false}
                                         className="w-20 h-20 rounded-lg object-cover"
                                     />
 

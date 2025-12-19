@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-export default function ProductCard({ item,page }) {
+export default function ProductCard({ item, page }) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -8,13 +8,14 @@ export default function ProductCard({ item,page }) {
     router.push(`/productDetails/${item.id}`);
   }
   return (
-    <div className={`${page == 'category' ? 
-    "  min-w-full productBoxShadow  max-w-full h-full   border-[1px] border-[#848181] bg-white rounded-[29px] cursor-pointer  p-3 hover:shadow-lg transition-all duration-300" : 
-    "lg:min-w-[200px]  min-w-full productBoxShadow space-y-2  lg:max-w-[250px] max-w-full h-[320px]  border-[1px] border-[#848181] bg-white rounded-[29px] cursor-pointer  p-[9px] hover:shadow-lg transition-all duration-300"}`}>
+    <div className={`${page == 'category' ?
+      "  min-w-full productBoxShadow  max-w-full h-full   border-[1px] border-[#848181] bg-white rounded-[29px] cursor-pointer  p-3 hover:shadow-lg transition-all duration-300" :
+      "lg:min-w-[200px]  min-w-full productBoxShadow space-y-2  lg:max-w-[250px] max-w-full h-[320px]  border-[1px] border-[#848181] bg-white rounded-[29px] cursor-pointer  p-[9px] hover:shadow-lg transition-all duration-300"}`}>
       <div className="w-full h-[190px] rounded-[20px] overflow-hidden" onClick={() => handleClick()}>
         <Image
           src={item.image.thumbnail_url}
           alt={item.name}
+          draggable={false}
           width={190}
           height={190}
           className="object-cover w-full h-full"

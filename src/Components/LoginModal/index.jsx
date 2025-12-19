@@ -19,7 +19,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
     const [showConfirmPass, setShowConfirmPass] = useState(false);
     const [phonePassword, setPhonepassword] = useState(false);
 
-    
+
     useEffect(() => {
         if (open) {
             document.body.style.overflow = "hidden"; // lock scroll
@@ -238,6 +238,8 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                             width={40}
                                             height={22}
                                             alt="call"
+                                            draggable={false}
+
                                         />
                                     </button>
 
@@ -341,6 +343,8 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                             width={40}
                                             height={22}
                                             alt="call"
+                                            draggable={false}
+
                                         />
                                     </button>
 

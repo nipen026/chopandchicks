@@ -13,13 +13,13 @@ export default function Footer() {
 
         {/* Logo + App buttons */}
         <div className="flex flex-col items-center">
-          <Image src="/assets/footer_logo.png" width={80} height={80} alt="logo" className="rounded-full" />
+          <Image src="/assets/footer_logo.png" width={80} height={80} alt="logo" className="rounded-full" draggable={false} />
 
           <div className="flex gap-2 items-center mt-4">
             <p className=" text-lg">Download the app</p>
             <div className="flex gap-3">
-              <Image src="/assets/playstore.png" width={30} height={30} alt="playstore" />
-              <Image src="/assets/appstore.png" width={30} height={30} alt="appstore" />
+              <Image src="/assets/playstore.png" width={30} height={30} alt="playstore" draggable={false} />
+              <Image src="/assets/appstore.png" width={30} height={30} alt="appstore" draggable={false} />
             </div>
           </div>
         </div>

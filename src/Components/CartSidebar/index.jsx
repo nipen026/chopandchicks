@@ -143,6 +143,7 @@ export default function CartSidebar({ open, onClose }) {
                             src="/assets/empty-cart.png"
                             width={170}
                             height={170}
+                            draggable={false}
                             alt="Empty Cart"
                         />
                         <p className="text-gray-700 mt-3 font-medium">Your cart is empty</p>
@@ -165,6 +166,7 @@ export default function CartSidebar({ open, onClose }) {
                                     src={item.image}
                                     width={100}
                                     height={100}
+                                        draggable={false}
                                     alt="product"
                                     className="rounded-md object-cover"
                                 />

@@ -16,6 +16,7 @@ export default function ProductDetailCard() {
           src="/chicken.jpg"     // replace with real image
           width={500}
           height={500}
+          draggable={false}
           alt="product"
           className="rounded-xl w-full h-[340px] object-cover shadow-md"
         />

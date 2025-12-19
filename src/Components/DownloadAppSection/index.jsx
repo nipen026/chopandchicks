@@ -13,27 +13,29 @@ export default function DownloadAppSection() {
           </h2>
 
           <p className="text-gray-600 leading-relaxed mb-8 max-w-md">
-            Lorem ipsum dolor sit amet consectetur. Imperdiet elementum mattis tristique 
-            velit enim parturient. Morbi leo mi at amet tempus. Leo ante lorem cursus 
+            Lorem ipsum dolor sit amet consectetur. Imperdiet elementum mattis tristique
+            velit enim parturient. Morbi leo mi at amet tempus. Leo ante lorem cursus
             tristique. Nulla urna faucibus mauris tristique elementum mauris platea.
           </p>
 
           {/* Store Buttons */}
           <div className="flex items-center gap-4">
             <button>
-              <Image 
-                src="/assets/app_banner.png" 
-                alt="App Store" 
-                width={170} 
-                height={50} 
+              <Image
+                src="/assets/app_banner.png"
+                alt="App Store"
+                width={170}
+                height={50}
+                draggable={false}
               />
             </button>
 
             <button>
-              <Image 
-                src="/assets/play_banner.png" 
-                alt="Google Play" 
-                width={180} 
+              <Image
+                src="/assets/play_banner.png"
+                alt="Google Play"
+                width={180}
+                draggable={false}
                 height={50}
               />
             </button>
@@ -43,7 +45,7 @@ export default function DownloadAppSection() {
         {/* Right Side Mobile Screens */}
         <div className="flex justify-center md:justify-end items-end relative gap-4">
           {/* Back Left Image */}
-         
+
 
           {/* Main Center Image */}
           <Image
@@ -51,10 +53,11 @@ export default function DownloadAppSection() {
             alt="App Screen"
             width={500}
             height={200}
+            draggable={false}
             className="rounded-xl fit-cover  z-10"
           />
 
-       
+
         </div>
       </div>
     </section>

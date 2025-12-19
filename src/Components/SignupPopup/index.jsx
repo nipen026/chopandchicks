@@ -168,7 +168,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
 
             {/* Logo */}
             <div className="flex justify-center mb-4">
-              <img src="/assets/footer_logo.png" alt="logo" className="w-28 h-28 object-cover" />
+              <img src="/assets/footer_logo.png" alt="logo" draggable={false} className="w-28 h-28 object-cover" />
             </div>
 
             {/* Tabs */}

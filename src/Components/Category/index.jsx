@@ -29,6 +29,7 @@ export default function CategorySection() {
                 src={item.img}
                 alt={item.name}
                 width={200}
+                draggable={ false }
                 height={200}
                 className="object-cover w-full h-full"
               />

@@ -162,6 +162,7 @@ useEffect(() => {
                                 width={60}
                                 height={60}
                                 alt="Chop & Chicks"
+                                draggable={ false }
                                 className="rounded-full"
                             />
                         </Link>

@@ -93,6 +93,7 @@ export default function ProfilePage() {
                 src="/assets/footer_logo.png"
                 width={90}
                 height={90}
+                draggable={ false }
                 alt="User"
                 className="rounded-full object-cover"
               />
@@ -148,6 +149,7 @@ export default function ProfilePage() {
                   src="/assets/footer_logo.png"
                   width={90}
                   height={90}
+                draggable={ false }
                   alt="User"
                   className="rounded-full object-cover"
                 />
