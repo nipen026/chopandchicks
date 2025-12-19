@@ -10,7 +10,7 @@ export default function ProductCard({ item,page }) {
   return (
     <div className={`${page == 'category' ? 
     "  min-w-full productBoxShadow  max-w-full h-full   border-[1px] border-[#848181] bg-white rounded-[29px] cursor-pointer  p-3 hover:shadow-lg transition-all duration-300" : 
-    "lg:min-w-[200px]  min-w-full productBoxShadow space-y-2  lg:max-w-[200px] max-w-full h-full lg:h-[320px]  border-[1px] border-[#848181] bg-white rounded-[29px] cursor-pointer  p-[9px] hover:shadow-lg transition-all duration-300"}`}>
+    "lg:min-w-[200px]  min-w-full productBoxShadow space-y-2  lg:max-w-[200px] max-w-full h-[320px]  border-[1px] border-[#848181] bg-white rounded-[29px] cursor-pointer  p-[9px] hover:shadow-lg transition-all duration-300"}`}>
       <div className="w-full h-[190px] rounded-[20px] overflow-hidden" onClick={() => handleClick()}>
         <Image
           src={item.image.thumbnail_url}
@@ -34,7 +34,7 @@ export default function ProductCard({ item,page }) {
           <p className="font-semibold text-xl text-gray-800">₹{item.original_price}</p>
           <del className="font-medium text-sm text-gray-300">₹{item.sale_price}</del>
         </div>
-        <button className="btn-gradient text-white text-xs px-2 py-1.5 rounded-full hover:bg-red-600 transition">
+        <button className="bg-secondary text-white text-xs px-2 py-1.5 rounded-full hover:bg-red-600 transition">
           Add +
         </button>
       </div>

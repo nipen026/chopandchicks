@@ -92,7 +92,7 @@ export default function BestsellerSection({ title, desc }) {
 
     return (
         <div className="container  bg-[#F5F7FA] py-8 ">
-            <h2 className="text-2xl text-black font-semibold">
+            <h2 className="text-2xl text-black font-medium">
                 {title || "Bestsellers"}
             </h2>
             <p className="text-gray-500 text-sm mt-1">

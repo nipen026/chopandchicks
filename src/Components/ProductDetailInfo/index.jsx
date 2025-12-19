@@ -72,7 +72,7 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
 
                 {/* Title */}
                 <div className="flex justify-between items-start">
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+                    <h2 className="text-2xl md:text-3xl font-medium text-gray-800">
                         {product?.name}
                     </h2>
 
@@ -103,7 +103,7 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
 
                 {/* Description */}
                 <div className="mt-6 text-gray-700 text-sm leading-6">
-                    <p className="flex items-start gap-2">
+                    <p className="flex items-center gap-2">
                         <span className="text-xl"><GiHamburgerMenu /></span>
                         {product?.description}
                     </p>
@@ -112,7 +112,7 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
                 {/* Price + Button */}
                 <div className="mt-6 flex items-center justify-between">
                     <div>
-                        <p className="text-red-600 font-bold text-2xl">₹{product?.sale_price}</p>
+                        <p className="text-red-600 font-medium text-2xl">₹{product?.sale_price}</p>
 
                         <div className="flex items-center gap-2">
                             {product?.original_price && (

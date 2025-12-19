@@ -39,9 +39,9 @@ export default function Category() {
                         <p className="text-gray-500 text-sm mt-1 mb-8">
                             Most popular products near you!
                         </p>
-                        <div className="grid grid-cols-4 space-y-3">
+                        <div className="grid grid-cols-1 lg:grid-cols-4  md:grid-cols-3 sm:grid-cols-2 ">
                             {products.map((item, index) => (
-                                <div key={index} className="px-2">
+                                <div key={index} className="px-2 mt-3">
                                     <CategoryCard product={item} />
                                 </div>
                             ))}
