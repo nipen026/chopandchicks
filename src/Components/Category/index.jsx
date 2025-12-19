@@ -24,7 +24,7 @@ export default function CategorySection() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 text-center">
         {categories.map((item, i) => (
           <div key={i} className="group cursor-pointer" onClick={()=>{router.push(`/Category/${item.name}`)}}>
-            <div className="w-32 h-32 mx-auto rounded-full overflow-hidden shadow-md border border-gray-200 transition-transform duration-300 group-hover:scale-105">
+            <div className="w-36 h-36 mx-auto rounded-full overflow-hidden shadow-md border border-gray-200 transition-transform duration-300 group-hover:scale-105">
               <Image
                 src={item.img}
                 alt={item.name}
