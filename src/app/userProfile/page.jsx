@@ -6,11 +6,12 @@ import { IoBagCheck } from "react-icons/io5";
 import { MdOutlineLogout } from "react-icons/md";
 import { supabase } from "../../lib/supabaseClient";
 import toast from "react-hot-toast";
+import OrderDetails from "../OrderDetails/page";
 
 export default function ProfilePage() {
   const [active, setActive] = useState("profile");
   const [user, setUser] = useState(null);
-
+  const [avatarUrl, setAvatarUrl] = useState(null);
   // Form states
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -36,6 +37,7 @@ export default function ProfilePage() {
         setLastName(l || "");
         setEmail(u.email || "");
         setPhone(u.user_metadata?.phone || "");
+        setAvatarUrl(u.user_metadata?.avatar_url || null);
       }
     };
 
@@ -67,9 +69,51 @@ export default function ProfilePage() {
     setMsg("Profile updated successfully!");
     setUser(data.user);
   };
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !user) return;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${user.id}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    setLoading(true);
+
+    const { error: uploadError } = await supabase.storage
+      .from("profile-images")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast.error(uploadError.message);
+      setLoading(false);
+      return;
+    }
+
+    const { data } = supabase.storage
+      .from("profile-images")
+      .getPublicUrl(filePath);
+
+    const publicUrl = data.publicUrl;
+
+    // Save image URL in user metadata
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        avatar_url: publicUrl,
+      },
+    });
+
+    if (updateError) {
+      toast.error(updateError.message);
+    } else {
+      setAvatarUrl(publicUrl);
+      toast.success("Profile image updated");
+    }
+
+    setLoading(false);
+  };
 
   // ---------------- Logout ----------------
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth-token");
       window.location.href = "/";
@@ -93,7 +137,7 @@ export default function ProfilePage() {
                 src="/assets/footer_logo.png"
                 width={90}
                 height={90}
-                draggable={ false }
+                draggable={false}
                 alt="User"
                 className="rounded-full object-cover"
               />
@@ -105,22 +149,20 @@ export default function ProfilePage() {
             <div className="mt-8 space-y-3">
               <button
                 onClick={() => setActive("profile")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                  active === "profile"
-                    ? "bg-red-500 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${active === "profile"
+                  ? "bg-red-500 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+                  }`}
               >
                 <FaUser /> My Profile
               </button>
 
               <button
                 onClick={() => setActive("orders")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${
-                  active === "orders"
-                    ? "bg-red-500 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium ${active === "orders"
+                  ? "bg-red-500 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+                  }`}
               >
                 <IoBagCheck /> My Orders
               </button>
@@ -136,107 +178,121 @@ export default function ProfilePage() {
         </div>
 
         {/* ---------------- Profile Form ---------------- */}
-        <div className="w-full md:w-3/4">
-          <div className="bg-white rounded-2xl shadow-md p-8">
-            <h2 className="text-xl font-semibold text-red-600 mb-6">
-              Profile Settings
-            </h2>
+        {active === "profile" && (
+          <div className="w-full md:w-3/4">
+            <div className="bg-white rounded-2xl shadow-md p-8">
+              <h2 className="text-xl font-semibold text-red-600 mb-6">
+                Profile Settings
+              </h2>
 
-            <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
-              {/* Profile Picture */}
-              <div className="relative">
-                <Image
-                  src="/assets/footer_logo.png"
-                  width={90}
-                  height={90}
-                draggable={ false }
-                  alt="User"
-                  className="rounded-full object-cover"
-                />
+              <div className="flex flex-col sm:flex-row items-center gap-6 mb-8">
+                {/* Profile Picture */}
+                <div className="relative">
+                  <Image
+                    src={avatarUrl || "/assets/footer_logo.png"}
+                    width={90}
+                    height={90}
+                    alt="User"
+                    draggable={false}
+                    className="rounded-full object-cover"
+                  />
 
-                <label
-                  htmlFor="upload"
-                  className="absolute bottom-0 right-0 bg-red-500 text-white p-2 rounded-full cursor-pointer hover:bg-red-600"
+                  <label
+                    htmlFor="upload"
+                    className="absolute bottom-0 right-0 bg-red-500 text-white p-2 rounded-full cursor-pointer hover:bg-red-600"
+                  >
+                    <FaUpload />
+                  </label>
+                  <input
+                    type="file"
+                    id="upload"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                </div>
+
+                <p className="font-medium text-lg text-gray-700">
+                  {firstName + " " + lastName}
+                </p>
+              </div>
+
+              {/* ---------------- Form Fields ---------------- */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">
+                    First Name*
+                  </label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">
+                    Last Name*
+                  </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">
+                    Email*
+                  </label>
+                  <input
+                   disabled={email ? true : false}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">
+                    Phone*
+                  </label>
+                  <input
+                    disabled={phone ? true : false}
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
+                  />
+                </div>
+              </div>
+
+              {/* ---------------- Success / Error Message ---------------- */}
+              {msg && (
+                <p className="text-center mt-5 text-green-600 font-medium">
+                  {msg}
+                </p>
+              )}
+
+              <div className="flex justify-center mt-10">
+                <button
+                  onClick={handleUpdate}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white px-10 py-3 rounded-full text-lg font-semibold hover:opacity-90 transition"
                 >
-                  <FaUpload />
-                </label>
-                <input type="file" id="upload" className="hidden" />
-              </div>
-
-              <p className="font-medium text-lg text-gray-700">
-                {firstName + " " + lastName}
-              </p>
-            </div>
-
-            {/* ---------------- Form Fields ---------------- */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="text-sm font-semibold text-gray-700">
-                  First Name*
-                </label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-gray-700">
-                  Last Name*
-                </label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-gray-700">
-                  Email*
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-gray-700">
-                  Phone*
-                </label>
-                <input
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
-                />
+                  {loading ? "Updating..." : "Update"}
+                </button>
               </div>
             </div>
+          </div>)}
 
-            {/* ---------------- Success / Error Message ---------------- */}
-            {msg && (
-              <p className="text-center mt-5 text-green-600 font-medium">
-                {msg}
-              </p>
-            )}
-
-            <div className="flex justify-center mt-10">
-              <button
-                onClick={handleUpdate}
-                disabled={loading}
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-10 py-3 rounded-full text-lg font-semibold hover:opacity-90 transition"
-              >
-                {loading ? "Updating..." : "Update"}
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* ---------------- Orders Section ---------------- */}
+        {active === "orders" && (
+          <OrderDetails />
+        )}
       </div>
     </div>
   );
