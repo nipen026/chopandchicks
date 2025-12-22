@@ -139,7 +139,8 @@ export default function Navbar() {
     const sidebarClass = openMenu
         ? "translate-x-0"
         : "-translate-x-full";
-
+    console.log(token,"token");
+    
     return (
         <div className="z-[100] sticky container mt-5 top-0">
             {/* MAIN NAVBAR */}
