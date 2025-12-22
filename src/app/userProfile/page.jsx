@@ -7,6 +7,7 @@ import { MdOutlineLogout } from "react-icons/md";
 import { supabase } from "../../lib/supabaseClient";
 import toast from "react-hot-toast";
 import OrderDetails from "../OrderDetails/page";
+import OrderTable from "../../Components/OrderTable";
 
 export default function ProfilePage() {
   const [active, setActive] = useState("profile");
@@ -125,7 +126,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen py-10">
       <h1 className="text-center text-3xl font-semibold text-gray-800 mb-10">
-        My Profile
+        {active === "profile" ? "My Profile" : "My Orders"}
       </h1>
 
       <div className="container mx-auto flex flex-col md:flex-row gap-10 px-4">
@@ -291,8 +292,8 @@ export default function ProfilePage() {
 
         {/* ---------------- Orders Section ---------------- */}
         {active === "orders" && (
-          <OrderDetails />
-        )}
+          <OrderTable/>
+  )}
       </div>
     </div>
   );
