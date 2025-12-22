@@ -117,9 +117,11 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth-token");
+      localStorage.removeItem("userId");
       window.location.href = "/";
       let { error } = await supabase.auth.signOut();
       toast.error(error.message);
+      
     }
   };
 

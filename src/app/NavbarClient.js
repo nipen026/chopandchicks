@@ -14,8 +14,11 @@ export default function NavbarClient() {
 
     supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth changed:", session);
-      localStorage.setItem("auth-token", JSON.stringify(session?.access_token));
-      localStorage.setItem("userId", session?.user?.id);
+      if (!session) {
+        localStorage.setItem("auth-token", JSON.stringify(session?.access_token));
+        localStorage.setItem("userId", session?.user?.id);
+      }
+
     });
   }, []);
 
