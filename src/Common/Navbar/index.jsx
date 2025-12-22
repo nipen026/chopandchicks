@@ -122,18 +122,18 @@ export default function Navbar() {
             }
         );
     }, []);
-useEffect(() => {
-    if (!token && pathname === "/cart") {
-        // optional: remember where user wanted to go
-        sessionStorage.setItem("redirectAfterLogin", "/cart");
+    useEffect(() => {
+        if (!token && pathname === "/cart") {
+            // optional: remember where user wanted to go
+            sessionStorage.setItem("redirectAfterLogin", "/cart");
 
-        // open login modal
-        setIsLogin(true);
+            // open login modal
+            setIsLogin(true);
 
-        // redirect user to home page
-        router.replace("/", { scroll: false });
-    }
-}, [pathname, token, router]);
+            // redirect user to home page
+            router.replace("/", { scroll: false });
+        }
+    }, [pathname, token, router]);
 
     // 🟢 Sidebar animation
     const sidebarClass = openMenu
@@ -162,7 +162,7 @@ useEffect(() => {
                                 width={60}
                                 height={60}
                                 alt="Chop & Chicks"
-                                draggable={ false }
+                                draggable={false}
                                 className="rounded-full"
                             />
                         </Link>
@@ -213,14 +213,13 @@ useEffect(() => {
                     <div className="hidden lg:flex items-center gap-8">
                         <Link
                             href="/"
-                            className={`flex items-center gap-2 ${pathname === "/" ? "text-primary font-medium" : "text-gray-700"
-                                }`}
-                        >
+                            className={`flex items-center gap-2 ${pathname === "/" ? "text-primary font-medium" : "text-gray-700"}`}>
                             <HiOutlineHome className="text-xl" />
                             <span>Home</span>
                         </Link>
 
-                        <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-primary">
+                        <div className={`flex items-center cursor-pointer gap-2 ${pathname === "/OrderDetails" ? "text-primary font-medium" : "text-gray-700"
+                            }`} onClick={() => router.push("/OrderDetails")}>
                             <BsReceiptCutoff className="text-xl" />
                             <span>Orders</span>
                         </div>
@@ -299,7 +298,8 @@ useEffect(() => {
                         Home
                     </Link>
 
-                    <div className="flex items-center gap-3 text-lg">
+                    <div className={`flex items-center gap-3 text-lg ${pathname === "/OrderDetails" ? "text-primary font-medium" : "text-gray-700"
+                        }`} onClick={() => router.push("/OrderDetails")}>
                         <BsReceiptCutoff className="text-2xl" />
                         Orders
                     </div>
