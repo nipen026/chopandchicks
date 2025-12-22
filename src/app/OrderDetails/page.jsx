@@ -18,8 +18,8 @@ export default function OrderDetails() {
 
     const activeStep = 1; // 0,1,2,3 → change dynamically
     return (
-        <div className="min-h-screen bg-[#F6F7FB] flex justify-center py-10 px-4">
-            <div className="w-full max-w-6xl bg-white shadow-xl rounded-3xl p-8">
+        <div className="min-h-screen container bg-[#F6F7FB] flex justify-center py-10 px-4">
+            <div className="w-full  bg-white shadow-xl rounded-3xl p-8">
 
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
