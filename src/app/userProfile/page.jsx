@@ -80,7 +80,7 @@ export default function ProfilePage() {
     setLoading(true);
 
     const { error: uploadError } = await supabase.storage
-      .from("profile-images")
+      .from("user_images")
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
@@ -90,7 +90,7 @@ export default function ProfilePage() {
     }
 
     const { data } = supabase.storage
-      .from("profile-images")
+      .from("user_images")
       .getPublicUrl(filePath);
 
     const publicUrl = data.publicUrl;
