@@ -189,7 +189,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                 )}
 
                                 <div
-                                    className="text-right text-sm text-secondary font-medium mb-4 cursor-pointer"
+                                    className="text-right hover:underline text-sm text-secondary font-medium mb-4 cursor-pointer"
                                     onClick={() => {
                                         onClose();
                                         setIsForgot(true);
@@ -203,7 +203,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                     <button
                                         disabled={loading}
                                         onClick={handleLogin}
-                                        className={`w-[264px] btn-gradient hover:bg-red-700 text-white font-semibold
+                                        className={`w-[264px] bg-primary hover:bg-red-700 text-white font-semibold
                                         py-3 rounded-full transition mb-4 flex items-center justify-center gap-2
                                         ${loading ? "opacity-60 cursor-not-allowed" : ""}`}>
                                         {loading && (
@@ -219,7 +219,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                     <p>
                                         Don’t have an account?{" "}
                                         <span
-                                            className="text-secondary cursor-pointer"
+                                            className="text-secondary hover:underline cursor-pointer"
                                             onClick={() => {
                                                 setIsSignUp(true);
                                                 onClose();
@@ -294,7 +294,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                 )}
 
                                 <div
-                                    className="text-right text-sm text-secondary font-medium mb-4 cursor-pointer"
+                                    className="text-right hover:underline text-sm text-secondary font-medium mb-4 cursor-pointer"
                                     onClick={() => {
                                         onClose();
                                         setIsForgot(true);
@@ -308,7 +308,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                     <button
                                         disabled={loading}
                                         onClick={handlePhoneLogin}
-                                        className={`w-[264px] btn-gradient hover:bg-red-700 text-white font-semibold
+                                        className={`w-[264px] bg-primary hover:bg-red-700 text-white font-semibold
                                         py-3 rounded-full transition mb-4 flex items-center justify-center gap-2
                                         ${loading ? "opacity-60 cursor-not-allowed" : ""}`}>
                                         {loading && (
@@ -324,7 +324,7 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                     <p>
                                         Don’t have an account?{" "}
                                         <span
-                                            className="text-secondary cursor-pointer"
+                                            className="text-secondary hover:underline cursor-pointer"
                                             onClick={() => {
                                                 setIsSignUp(true);
                                                 onClose();

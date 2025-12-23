@@ -139,8 +139,8 @@ export default function Navbar() {
     const sidebarClass = openMenu
         ? "translate-x-0"
         : "-translate-x-full";
-    console.log(token,"token");
-    
+    console.log(token, "token");
+
     return (
         <div className="z-[100] sticky container mt-5 top-0">
             {/* MAIN NAVBAR */}
@@ -170,7 +170,7 @@ export default function Navbar() {
 
                         {/* Mobile location */}
                         <div className="block lg:hidden">
-                            <div className="flex items-center gap-1 text-gray-700 font-medium text-sm mt-2">
+                            <div className="flex items-center gap-1 text-black font-medium text-sm mt-2">
                                 <FaLocationDot className="text-red-600" />
                                 <span>{location.city}</span>
                                 <span className="text-xs">▼</span>
@@ -180,7 +180,7 @@ export default function Navbar() {
 
                         {/* Desktop location */}
                         <div className="hidden lg:block">
-                            <div className="flex items-center gap-1 text-gray-700 font-medium">
+                            <div className="flex items-center gap-1 text-black font-medium">
                                 <FaLocationDot className="text-red-600" />
                                 <span>{location.city}</span>
                                 <span className="text-sm">▼</span>
@@ -193,7 +193,7 @@ export default function Navbar() {
                     </div>
 
                     {/* SEARCH BAR DESKTOP */}
-                    <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-full max-w-md">
+                    <div className="hidden md:flex items-center bg-gray-100 rounded-lg border-2 px-4 py-2 w-full max-w-md">
                         <input
                             type="text"
                             placeholder="Search for any delicious product"
@@ -204,7 +204,7 @@ export default function Navbar() {
 
                     {/* Mobile search icon */}
                     <button
-                        className="md:hidden text-2xl text-gray-700"
+                        className="md:hidden text-2xl text-black"
                         onClick={() => setShowMobileSearch(!showMobileSearch)}
                     >
                         <FiSearch />
@@ -214,25 +214,28 @@ export default function Navbar() {
                     <div className="hidden lg:flex items-center gap-8">
                         <Link
                             href="/"
-                            className={`flex items-center gap-2 ${pathname === "/" ? "text-primary font-medium" : "text-gray-700"}`}>
+                            className={`flex items-center gap-2 ${pathname === "/" ? "text-primary font-medium" : "text-black"}`}>
                             <HiOutlineHome className="text-xl" />
                             <span>Home</span>
                         </Link>
 
-                        <div className={`flex items-center cursor-pointer gap-2 ${pathname === "/OrderDetails" ? "text-primary font-medium" : "text-gray-700"
+                        <div className={`flex items-center cursor-pointer gap-2 ${pathname === "/OrderDetails" ? "text-primary font-medium" : "text-black"
                             }`} onClick={() => router.push("/OrderDetails")}>
-                            <BsReceiptCutoff className="text-xl" />
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.10009 12.9667H14.9M9.10009 9.10009H14.9M9.10009 16.8333H12.0001M2.3335 18.7666V5.23346M21.6666 18.7666V5.23346M18.7666 15.8667C18.7666 18.6004 18.7666 19.9682 17.917 20.8169C17.0682 21.6666 15.7004 21.6666 12.9667 21.6666H11.0334C8.2997 21.6666 6.93188 21.6666 6.08315 20.8169C5.23346 19.9682 5.23346 18.6004 5.23346 15.8667V12.0001M5.23346 8.13343C5.23346 5.39973 5.23346 4.03191 6.08315 3.18319C6.93188 2.3335 8.2997 2.3335 11.0334 2.3335H12.9667C15.7004 2.3335 17.0682 2.3335 17.917 3.18319C18.7666 4.03191 18.7666 5.39973 18.7666 8.13343V12.0001" stroke="#0D0D0E" stroke-width="1.44998" stroke-linecap="round" />
+                            </svg>
+
                             <span>Orders</span>
                         </div>
 
-                        <div className={`flex items-center hover:text-primary gap-2 cursor-pointer ${pathname === "/cart" ? "text-primary font-medium" : "text-gray-700"}`} onClick={() => router.push("/cart")}>
+                        <div className={`flex items-center hover:text-primary gap-2 cursor-pointer ${pathname === "/cart" ? "text-primary font-medium" : "text-black"}`} onClick={() => router.push("/cart")}>
                             <AiOutlineShopping className="text-xl" />
                             <span>Cart</span>
                         </div>
 
                         {token ? (
                             <div
-                                className={`flex items-center gap-2 cursor-pointer ${pathname === "/userProfile" ? "text-primary font-medium" : "text-gray-700"
+                                className={`flex items-center gap-2 cursor-pointer ${pathname === "/userProfile" ? "text-primary font-medium" : "text-black"
                                     }`}
                                 onClick={() => router.push("/userProfile")}
                             >
@@ -288,10 +291,10 @@ export default function Navbar() {
                 </div>
 
                 {/* MENU ITEMS */}
-                <div className="flex flex-col gap-6 text-gray-700">
+                <div className="flex flex-col gap-6 text-black">
                     <Link
                         href="/"
-                        className={`flex items-center gap-3 text-lg ${pathname === "/" ? "text-primary font-medium" : "text-gray-700"
+                        className={`flex items-center gap-3 text-lg ${pathname === "/" ? "text-primary font-medium" : "text-black"
                             }`}
                         onClick={() => setOpenMenu(false)}
                     >
@@ -299,13 +302,13 @@ export default function Navbar() {
                         Home
                     </Link>
 
-                    <div className={`flex items-center gap-3 text-lg ${pathname === "/OrderDetails" ? "text-primary font-medium" : "text-gray-700"
+                    <div className={`flex items-center gap-3 text-lg ${pathname === "/OrderDetails" ? "text-primary font-medium" : "text-black"
                         }`} onClick={() => router.push("/OrderDetails")}>
                         <BsReceiptCutoff className="text-2xl" />
                         Orders
                     </div>
 
-                    <div className={`flex  ${pathname === "/cart" ? "text-primary font-medium" : "text-gray-700"} items-center gap-3 text-lg`} onClick={() => {
+                    <div className={`flex  ${pathname === "/cart" ? "text-primary font-medium" : "text-black"} items-center gap-3 text-lg`} onClick={() => {
                         setOpenMenu(false);
                         router.push("/cart");
                     }}>
@@ -315,7 +318,7 @@ export default function Navbar() {
 
                     {token ? (
                         <div
-                            className={`flex  ${pathname === "/userProfile" ? "text-primary font-medium" : "text-gray-700"} items-center gap-3 text-lg`}
+                            className={`flex  ${pathname === "/userProfile" ? "text-primary font-medium" : "text-black"} items-center gap-3 text-lg`}
                             onClick={() => {
                                 setOpenMenu(false);
                                 router.push("/userProfile");

@@ -251,7 +251,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
 
                 {/* Submit */}
                 <button
-                  className="w-full btn-gradient text-white font-semibold py-3 rounded-full text-lg flex justify-center items-center gap-2"
+                  className="w-full bg-primary text-white font-semibold py-3 rounded-full text-lg flex justify-center items-center gap-2"
                   disabled={loading}
                   onClick={handleEmailSignup}
                 >
