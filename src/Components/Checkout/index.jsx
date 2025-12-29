@@ -19,7 +19,7 @@ export default function Checkout() {
 
     // Payment
     const [paymentMethod, setPaymentMethod] = useState("netbanking");
-
+    const addressId = localStorage.getItem("selected_address_id");
 
     /* ---------------- CART ---------------- */
     useEffect(() => {
@@ -49,7 +49,7 @@ const buildInsertOrderPayload = async ({
 
   return {
     p_user_id: user.id,
-    p_address: null,
+    p_address: addressId,
     p_products_uuid: items.map(i => i.id),
     p_product_quantities: items.map(i => i.qty),
     p_item_total: subtotal,

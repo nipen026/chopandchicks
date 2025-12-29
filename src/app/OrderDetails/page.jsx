@@ -17,13 +17,22 @@ export default function OrderDetails() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeStep, setActiveStep] = useState(0);
+    const [userData, setUserData] = useState();
+    const [address, setAddress] = useState();
     const pathname = usePathname();
+    const STATUS_STEP_MAP = {
+        pending: 0,        // Order in progress
+        assigned: 1,       // Order Assigned
+        on_the_way: 2,     // Order on the Way
+        delivered: 3,      // Order Delivered
+    };
     const steps = [
         "Order in progress",
         "Order Assigned",
         "Order on the Way",
-        "Order Delivered",
-    ];
+        "Order Delivered"
+    ]
     useEffect(() => {
         const checkAuth = async () => {
             const {
@@ -32,26 +41,28 @@ export default function OrderDetails() {
 
             if (!user) {
                 router.push(`/?login=true`);
+            } else {
+                setUserData(user);
             }
         };
 
         checkAuth();
     }, [router, pathname]);
 
+    console.log(userData, "userData");
 
 
     /* ================= FETCH ORDER ================= */
     useEffect(() => {
-        // if (!orderId) return;
-
         const fetchOrder = async () => {
             setLoading(true);
 
-            const { data: orderData, error } = await supabase
-                .from("orders")
+            const { data, error } = await supabase
+                .from("vendor_order")
                 .select("*")
-                .eq("id", orderId)
-                .single();
+                .order("created_at", { ascending: false }) // latest first
+                .limit(1)
+                .single(); // 👈 convert array → object
 
             if (error) {
                 console.error(error);
@@ -59,18 +70,37 @@ export default function OrderDetails() {
                 return;
             }
 
-            const { data: itemData } = await supabase
-                .from("order_items")
-                .select("*")
-                .eq("order_id", orderId);
+            setOrder(data);
+            userAddress(data.address)
+            setActiveStep(STATUS_STEP_MAP[data.order_status] ?? 0);
 
-            setOrder(orderData);
-            setItems(itemData || []);
+            setItems(
+                data.products.map((product, index) => ({
+                    ...product,
+                    quantity: data.product_quantities?.[index] || 1,
+                }))
+            );
+
             setLoading(false);
         };
 
         fetchOrder();
-    }, [orderId]);
+    }, []);
+
+    const userAddress = async (addressId) => {
+        const { data, error } = await supabase
+            .from("user_address")
+            .select("*")
+            .eq("id", addressId).single();
+        if (data) {
+            setAddress(data);
+        }
+        if (error) {
+            console.error("Error fetching address:", error);
+            return;
+        }
+
+    }
 
     if (loading) {
         return <p className="text-center py-20">Loading order...</p>;
@@ -106,10 +136,10 @@ export default function OrderDetails() {
                 <div className="text-center mb-10">
                     <h2 className="text-xl font-medium">Thank You</h2>
                     <p className="text-gray-600 mt-1">Your order status is as follows</p>
-                    <p className="font-medium mt-1">
+                    {/* <p className="font-medium mt-1">
                         Order ID:
                         <span className="font-light"> #{order.order_number}</span>
-                    </p>
+                    </p> */}
                 </div>
                 {/* TIMELINE */}
                 <div className="relative px-8 mb-10">
@@ -151,7 +181,7 @@ export default function OrderDetails() {
                         <div className="border rounded-xl p-5">
                             <p className="flex justify-between text-sm">
                                 <span className="font-semibold">Order Status</span>
-                                <span className="text-green-600 capitalize">{order.status}</span>
+                                <span className="text-green-600 capitalize">{order.order_status}</span>
                             </p>
                             <p className="flex justify-between text-sm mt-2">
                                 <span className="font-semibold">Items</span>
@@ -163,20 +193,32 @@ export default function OrderDetails() {
                             <div className="flex gap-3 items-center">
                                 <FaUserCircle className="text-4xl text-gray-400" />
                                 <div>
-                                    <p className="font-semibold">{order.user_name}</p>
-                                    <p className="text-sm text-gray-500">{order.phone}</p>
+                                    <p className="font-semibold">{userData?.user_metadata.full_name}</p>
+                                    <p className="text-sm text-gray-500">{userData?.user_metadata?.phone}</p>
                                 </div>
                             </div>
 
                             <div className="border-t mt-4 pt-4 text-sm space-y-2">
-                                <p className="font-semibold">Payment</p>
-                                <p className="text-gray-600">{order.payment_method}</p>
+                                <div className="flex gap-2 items-center">
+                                    <p className="font-semibold">Payment : </p>
+                                    <p className="text-gray-600">{order.paid_via == 'razorpay' ? 'Razorpay' : 'Cash on Delivery'}</p>
+                                </div>
 
                                 <p className="font-semibold">Delivery Address</p>
-                                <div className="flex gap-2">
+                                <div className="flex items-center gap-2">
                                     <IoLocationSharp className="text-red-500" />
-                                    <p>{order.delivery_address}</p>
+                                    <p>{address?.flat_house_building},</p>
+                                    <p>{address?.address_line},</p>
+                                    <p>{address?.landmark},</p>
+                                    <p>{address?.city},</p>
+                                    <p>{address?.state},</p>
+                                    <p>{address?.country},</p>
+                                    <p>{address?.postal_code}</p>
                                 </div>
+                                <button
+                                    className={`flex items-center gap-2 px-4 py-2 btn-gradient text-white rounded-full border `}>
+                                    {address?.address_type?.toUpperCase()}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -188,31 +230,32 @@ export default function OrderDetails() {
                         <div className="space-y-3">
                             {items.map((item) => (
                                 <div key={item.id} className="border rounded-lg p-3 flex gap-3 bg-gray-50">
-                                    <img src={item.image} className="w-20 h-20 rounded object-cover" />
+                                    <img
+                                        src={item.image?.image_url}
+                                        className="w-20 h-20 rounded object-cover"
+                                    />
                                     <div className="text-sm">
-                                        <p className="font-semibold">{item.product_name}</p>
+                                        <p className="font-semibold">{item.name}</p>
                                         <p className="text-xs text-gray-500">{item.weight}</p>
-                                        <p className="font-semibold">
-                                            ₹{item.price}
-                                            <span className="line-through text-xs text-gray-400 ml-2">
-                                                ₹{item.original_price}
-                                            </span>
-                                        </p>
+                                        <p className="font-semibold">₹{item.sale_price}</p>
                                         <p className="text-xs">Qty {item.quantity}</p>
                                     </div>
                                 </div>
                             ))}
+
                         </div>
 
                         <div className="border-t mt-4 pt-4 space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <p>Item Total</p>
-                                <p>₹{order.total_amount - order.delivery_charge}</p>
+                                <p>₹{order.item_total}</p>
                             </div>
+
                             <div className="flex justify-between">
                                 <p>Delivery</p>
-                                <p>₹{order.delivery_charge}</p>
+                                <p>₹{order.delivery_fee}</p>
                             </div>
+
                             <div className="flex justify-between font-semibold text-lg">
                                 <p>Total</p>
                                 <p>₹{order.total_amount}</p>

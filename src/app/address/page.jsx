@@ -11,12 +11,14 @@ export default function Address() {
     const [showModal, setShowModal] = useState(false);
     const [currentAddress, setCurrentAddress] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
-    const [method, setMethod] = useState('shipping')
+    const [method, setMethod] = useState('shipping');
+    const [selectedAddressId, setSelectedAddressId] = useState(null);
+
     const maxAddresses = 5;
 
     const openAddNew = () => {
         if (addresses.length >= maxAddresses) return;
-        setCurrentAddress({ id: Date.now(), name: "", phone: "", email: "", city: "", state: "", country: "", address: "", zip: "" });
+        setCurrentAddress({ id: Date.now(), full_name: "", contact_number: "", email: "", city: "", state: "", country: "", address: "", postal_code: "" });
         setIsEditMode(false);
         setShowModal(true);
     };
@@ -26,7 +28,16 @@ export default function Address() {
         setIsEditMode(true);
         setShowModal(true);
     };
-
+    useEffect(() => {
+        const savedId = localStorage.getItem("selected_address_id");
+        if (savedId) {
+            setSelectedAddressId(Number(savedId));
+        }
+    }, []);
+    const handleSelectAddress = (id) => {
+        setSelectedAddressId(id);
+        localStorage.setItem("selected_address_id", id);
+    };
     const handleSave = async () => {
         try {
             const { data: authData } = await supabase.auth.getUser();
@@ -38,23 +49,22 @@ export default function Address() {
             }
 
             // Build correct address_line field
-            const addressLineFinal =
-                `${currentAddress.area || ""} ${currentAddress.flat || ""}`.trim();
+            
 
             const payload = {
                 p_id: isEditMode ? currentAddress.id : null,
-                p_full_name: currentAddress.name || "User",
-                p_contact_number: currentAddress.phone || "",
-                p_address_line: addressLineFinal,
-                p_flat_house_building: currentAddress.flat || "",
+                p_full_name: currentAddress.full_name || "User",
+                p_contact_number: currentAddress.contact_number || "",
+                p_address_line: currentAddress.address_line || "",
+                p_flat_house_building: currentAddress.flat_house_building || "",
                 p_landmark: currentAddress.landmark || "",
                 p_city: currentAddress.city || "",
                 p_state: currentAddress.state || "",
                 p_country: currentAddress.country || "",
-                p_postal_code: currentAddress.zip || "",
+                p_postal_code: currentAddress.postal_code || "",
                 p_latitude: currentAddress.lat ?? null,
                 p_longitude: currentAddress.lng ?? null,
-                p_address_type: currentAddress.type || "home",
+                p_address_type: currentAddress.address_type || "home",
             };
 
             console.log("FINAL PAYLOAD →", payload);
@@ -94,6 +104,14 @@ export default function Address() {
             if (!error) {
                 setAddresses(data);
             }
+            if (data.length === 0) {
+                setShowModal(true);
+                setIsEditMode(false)
+            }
+            if (data.length > 0 && !localStorage.getItem("selected_address_id")) {
+                setSelectedAddressId(data[0].id);
+                localStorage.setItem("selected_address_id", data[0].id);
+            }
         };
 
         fetchAddresses();
@@ -108,36 +126,45 @@ export default function Address() {
 
                         {/* Address List */}
                         <div className="space-y-6">
-                            {addresses.map((addr) => (
-                                <div key={addr.id} className="border rounded-xl p-4">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <p className="text-sm font-medium text-black">Shipping Address</p>
+                            {addresses.map((addr) => {
+                                console.log(addr);
 
-                                        <div className="flex items-center gap-3 text-red-500 text-sm font-medium">
-                                            <button onClick={() => openEdit(addr)}>Edit</button>
-                                            {addresses.length < maxAddresses && (
-                                                <button onClick={openAddNew}>Add New</button>
-                                            )}
+                                return (
+                                    <div
+                                        key={addr.id}
+                                        onClick={() => handleSelectAddress(addr.id)}
+                                        className={`rounded-xl p-4 cursor-pointer transition-all border-2`}
+                                    >
+
+                                        <div className="flex items-center justify-between mb-3">
+                                            <p className="text-sm font-medium text-black">Shipping Address</p>
+
+                                            <div className="flex items-center gap-3 text-red-500 text-sm font-medium">
+                                                <button onClick={() => openEdit(addr)}>Edit</button>
+                                                {addresses.length < maxAddresses && (
+                                                    <button onClick={openAddNew}>Add New</button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className={selectedAddressId === addr.id ? "border-2 border-primary border rounded-lg p-4 bg-gray-50 text-sm leading-6" : "border border-gray-300 rounded-lg p-4 bg-gray-50 text-sm leading-6"}>
+                                            <p>{addr.full_name}</p>
+                                            <p>{addr.contact_number}</p>
+                                            <p>{addr.city},</p>
+                                            <p>{addr.state},</p>
+                                            <p>{addr.country},</p>
+                                            <p>{addr.address_line}</p>
+                                            <p>{addr.postal_code}</p>
+                                            <p>{addr.address_type}</p>
                                         </div>
                                     </div>
-
-                                    <div className="border rounded-lg p-4 bg-gray-50 text-sm leading-6">
-                                        <p>{addr.name}</p>
-                                        <p>{addr.phone}</p>
-                                        <p>{addr.email}</p>
-                                        <p>{addr.city},</p>
-                                        <p>{addr.state},</p>
-                                        <p>{addr.country},</p>
-                                        <p>{addr.address}</p>
-                                        <p>{addr.zip}</p>
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
 
                         {/* Save Checkbox */}
                         <div className="flex items-center gap-3 mt-6">
-                            <input type="checkbox" defaultChecked className="w-4 h-4 accent-red" />
+                            <input type="checkbox" defaultChecked className="w-4 h-4 accent-red-600" />
                             <p className="text-gray-700 text-sm">Save this information for faster check-out next time</p>
                         </div>
 
@@ -200,9 +227,9 @@ export default function Address() {
                                 type="text"
                                 placeholder="Full Name"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.name}
+                                value={currentAddress?.full_name}
                                 onChange={(e) =>
-                                    setCurrentAddress({ ...currentAddress, name: e.target.value })
+                                    setCurrentAddress({ ...currentAddress, full_name: e.target.value })
                                 }
                             />
 
@@ -211,9 +238,9 @@ export default function Address() {
                                 type="text"
                                 placeholder="Phone Number"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.phone}
+                                value={currentAddress?.contact_number}
                                 onChange={(e) =>
-                                    setCurrentAddress({ ...currentAddress, phone: e.target.value })
+                                    setCurrentAddress({ ...currentAddress, contact_number: e.target.value })
                                 }
                             />
 
@@ -222,9 +249,9 @@ export default function Address() {
                                 type="text"
                                 placeholder="Area / Locality"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.area}
+                                value={currentAddress?.address_line}
                                 onChange={(e) =>
-                                    setCurrentAddress({ ...currentAddress, area: e.target.value })
+                                    setCurrentAddress({ ...currentAddress, address_line: e.target.value })
                                 }
                             />
 
@@ -233,9 +260,9 @@ export default function Address() {
                                 type="text"
                                 placeholder="Flat / Building / Street"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.flat}
+                                value={currentAddress?.flat_house_building}
                                 onChange={(e) =>
-                                    setCurrentAddress({ ...currentAddress, flat: e.target.value })
+                                    setCurrentAddress({ ...currentAddress, flat_house_building: e.target.value })
                                 }
                             />
 
@@ -244,7 +271,7 @@ export default function Address() {
                                 type="text"
                                 placeholder="Landmark"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.landmark}
+                                value={currentAddress?.landmark}
                                 onChange={(e) =>
                                     setCurrentAddress({ ...currentAddress, landmark: e.target.value })
                                 }
@@ -255,7 +282,7 @@ export default function Address() {
                                 type="text"
                                 placeholder="City"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.city}
+                                value={currentAddress?.city}
                                 onChange={(e) =>
                                     setCurrentAddress({ ...currentAddress, city: e.target.value })
                                 }
@@ -266,7 +293,7 @@ export default function Address() {
                                 type="text"
                                 placeholder="State"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.state}
+                                value={currentAddress?.state}
                                 onChange={(e) =>
                                     setCurrentAddress({ ...currentAddress, state: e.target.value })
                                 }
@@ -275,20 +302,20 @@ export default function Address() {
                                 type="text"
                                 placeholder="Country"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.country}
+                                value={currentAddress?.country}
                                 onChange={(e) =>
                                     setCurrentAddress({ ...currentAddress, country: e.target.value })
                                 }
                             />
 
-                            {/* Zip */}
+                            {/* postal_code */}
                             <input
                                 type="text"
                                 placeholder="Postal Code"
                                 className="border bg-[#F2F2F2] p-2 rounded w-full"
-                                value={currentAddress.zip}
+                                value={currentAddress?.postal_code}
                                 onChange={(e) =>
-                                    setCurrentAddress({ ...currentAddress, zip: e.target.value })
+                                    setCurrentAddress({ ...currentAddress, postal_code: e.target.value })
                                 }
                             />
 
@@ -302,9 +329,9 @@ export default function Address() {
                                     <button
                                         key={opt.label}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-full border 
-                    ${currentAddress.type === opt.label ? "btn-gradient text-white" : "text-gray-600"}`}
+                                         ${currentAddress?.address_type === opt.label ? "btn-gradient text-white" : "text-gray-600"}`}
                                         onClick={() =>
-                                            setCurrentAddress({ ...currentAddress, type: opt.label })
+                                            setCurrentAddress({ ...currentAddress, address_type: opt.label })
                                         }
                                     >
                                         {opt.icon} {opt.label.toUpperCase()}
