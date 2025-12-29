@@ -20,6 +20,133 @@ export default function Checkout() {
     // Payment
     const [paymentMethod, setPaymentMethod] = useState("netbanking");
 
+
+    /* ---------------- CART ---------------- */
+    useEffect(() => {
+        const loadCart = async () => {
+            const { data } = await supabase.rpc("get_user_cart");
+            if (!data?.data?.products) return;
+
+            setItems(
+                data.data.products.map((p, i) => ({
+                    id: p.id,
+                    title: p.name,
+                    qty: data.data.quantities[i],
+                    price: p.sale_price,
+                    image: p.image?.image_url,
+                }))
+            );
+        };
+        loadCart();
+    }, []);
+
+const buildInsertOrderPayload = async ({
+  paidVia,
+  paymentId = null,
+  paymentData = null,
+}) => {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  return {
+    p_user_id: user.id,
+    p_address: null,
+    p_products_uuid: items.map(i => i.id),
+    p_product_quantities: items.map(i => i.qty),
+    p_item_total: subtotal,
+    p_tax_amount: tax,
+    p_delivery_fee: 0,
+    p_packaging_fee: 0,
+    p_total_amount: total,
+    p_paid_via: paidVia,          // "cod" | "razorpay"
+    p_payment_id: paymentId,
+    p_payment_data: paymentData,
+    p_schedule_time:
+      scheduleType === "schedule"
+        ? `${hour}:${minute} ${ampm}`
+        : null,
+    p_nearby_vendors: null,
+  };
+};
+const placeCODOrder = async () => {
+  setLoading(true);
+
+  const payload = await buildInsertOrderPayload({
+    paidVia: "cod",
+  });
+
+  const { data, error } = await supabase.rpc("insert_order", payload);
+
+  setLoading(false);
+
+  if (error) {
+    console.error("COD order failed:", error);
+    alert("Failed to place order");
+    return;
+  }
+
+  alert("Order placed successfully (Cash on Delivery)");
+};
+
+
+    /* ---------------- RAZORPAY ---------------- */
+    const loadRazorpay = () =>
+        new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+
+  const payWithRazorpay = async () => {
+  setLoading(true);
+
+  const loaded = await loadRazorpay();
+  if (!loaded) {
+    alert("Razorpay SDK failed to load");
+    setLoading(false);
+    return;
+  }
+
+  const options = {
+    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    amount: Math.round(total * 100),
+    currency: "INR",
+    name: "Chop & Chicks",
+
+    handler: async (response) => {
+      const payload = await buildInsertOrderPayload({
+        paidVia: "razorpay",
+        paymentId: response.razorpay_payment_id,
+        paymentData: response,
+      });
+
+      const { error } = await supabase.rpc("insert_order", payload);
+
+      if (error) {
+        console.error("Order save failed:", error);
+        alert("Payment done, but order not saved");
+        return;
+      }
+
+      alert("Payment successful & order placed 🎉");
+    },
+  };
+
+  new window.Razorpay(options).open();
+  setLoading(false);
+};
+
+
+    /* ---------------- COD ---------------- */
+  
+
+    /* ---------------- SUBMIT ---------------- */
+    const placeOrder = () => {
+        if (paymentMethod === "cod") placeCODOrder();
+        else payWithRazorpay();
+    };
+
     useEffect(() => {
         const fetchCart = async () => {
             setLoading(true);
@@ -323,7 +450,7 @@ export default function Checkout() {
                                 ⓘ  Cancellation must be made within 3 minutes of placing the order.
                             </p>
 
-                            <button className="w-full py-3 text-white rounded-lg btn-gradient">
+                            <button onClick={placeOrder} className="w-full py-3 text-white rounded-lg btn-gradient">
                                 Place Order →
                             </button>
                         </div>

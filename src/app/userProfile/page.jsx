@@ -140,7 +140,7 @@ export default function ProfilePage() {
                 height={90}
                 draggable={false}
                 alt="User"
-                className="rounded-full object-cover"
+                className="rounded-full w-90 h-90 object-cover"
               />
               <p className="mt-3 font-medium text-gray-700 text-lg">
                 {firstName + " " + lastName}
@@ -195,7 +195,7 @@ export default function ProfilePage() {
                     height={90}
                     alt="User"
                     draggable={false}
-                    className="rounded-full object-cover"
+                    className="rounded-full w-[90px] h-[90px] object-cover"
                   />
 
                   <label
