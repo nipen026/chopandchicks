@@ -1,6 +1,8 @@
 "use client";
 
+import { supabase } from "../../lib/supabaseClient";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 
 const orders = [
@@ -14,9 +16,10 @@ const orders = [
 ];
 
 const statusStyles = {
-  Completed: "bg-white text-green-600 border-[#26953E]",
-  Cancelled: "bg-white text-red-500 border-red-300",
-  "In Progress": "bg-white text-orange-500 border-orange-300",
+  delivered: "bg-white text-green-600 border-[#26953E]",
+  cancelled: "bg-white text-red-500 border-red-300",
+  pending: "bg-white text-orange-500 border-orange-300",
+  assigned: "bg-white text-blue-500 border-blue-300",
 };
 
 const paymentStyles = {
@@ -26,6 +29,43 @@ const paymentStyles = {
 };
 
 export default function OrderTable() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("vendor_order")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error(error);
+        setLoading(false);
+        return;
+      }
+
+      const now = Date.now();
+
+      const formattedOrders = data.map((order) => {
+        const createdTime = new Date(order.created_at).getTime();
+        const diffInSeconds = (now - createdTime) / 1000;
+
+        return {
+          ...order,
+          isCancelDisabled:
+            diffInSeconds > 180 || order.order_status !== "pending",
+        };
+      });
+
+      setOrders(formattedOrders);
+      setLoading(false);
+    };
+
+    fetchOrders();
+  }, []);
+
   return (
     <div className="bg-white w-full rounded-xl shadow-sm p-6">
       {/* Header */}
@@ -57,25 +97,25 @@ export default function OrderTable() {
           <tbody>
             {orders.map((order, i) => (
               <tr
-                key={i}
+                key={order.id}
                 className="border-b last:border-none hover:bg-gray-50 transition"
               >
                 {/* Order ID */}
                 <td className="py-4">
                   <div className="flex items-center gap-3">
                     <Image
-                      src="/assets/product.jpg" // replace with your image
+                      src={order.products?.[0]?.image?.image_url || "/assets/product.jpg"}
                       alt="product"
                       width={40}
                       height={40}
                       className="rounded-lg object-cover"
                     />
                     <div>
-                      <p className="font-medium text-gray-800">
-                        {order.id}
+                      <p className="font-medium capitalize text-gray-800">
+                       {order.products?.[0]?.name}
                       </p>
                       <p className="text-xs text-gray-400">
-                        {order.date}
+                        {new Date(order.created_at).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -83,40 +123,49 @@ export default function OrderTable() {
 
                 {/* Products */}
                 <td className="py-4 text-gray-500">
-                  {order.products} Product
+                  {order.products?.length || 0} Product
                 </td>
 
                 {/* Status */}
                 <td className="py-4">
                   <span
-                    className={`px-3 py-1 w-[130px] rounded-lg text-xs border font-medium ${statusStyles[order.status]}`}
+                    className={`px-3 py-1 w-[130px] capitalize rounded-lg text-xs border font-medium ${statusStyles[order.order_status]
+                      }`}
                   >
-                    {order.status}
+                    {order.order_status}
                   </span>
                 </td>
 
                 {/* Payment */}
                 <td className="py-4">
-                  <span
-                    className={`px-4 py-1 rounded-full text-xs font-medium ${paymentStyles[order.payment]}`}
-                  >
-                    {order.payment}
+                  <span className="px-4 py-1 rounded-full text-xs font-medium bg-gray-100">
+                    {order.paid_via === "razorpay" ? "Razorpay" : "Cash"}
                   </span>
                 </td>
 
                 {/* Amount */}
                 <td className="py-4 font-medium text-gray-700">
-                  {order.amount}
+                  ₹{order.total_amount}
                 </td>
 
                 {/* Action */}
-                <td className="py-4  text-center">
-                  <button className="w-6 h-6 btn-gradient text-white rounded-full ">
+                <td className="py-4 text-center">
+                  <button
+                    disabled={order.isCancelDisabled}
+                    className={`w-6 h-6 rounded-full text-white btn-gradient
+          ${order.isCancelDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                    title={
+                      order.isCancelDisabled
+                        ? "Cancel available only within 3 minutes"
+                        : "View / Cancel"
+                    }
+                  >
                     i
                   </button>
                 </td>
               </tr>
             ))}
+
           </tbody>
         </table>
       </div>
