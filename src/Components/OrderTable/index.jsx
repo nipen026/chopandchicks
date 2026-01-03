@@ -2,6 +2,7 @@
 
 import { supabase } from "../../lib/supabaseClient";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 
@@ -39,7 +40,7 @@ export default function OrderTable() {
 
   const [sortOpen, setSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState("date_desc");
-
+  const router = useRouter()
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -95,7 +96,9 @@ export default function OrderTable() {
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
-
+  const handleOrderDetails = (order) =>{
+    router.push(`OrderDetails?orderId=${order.id}`)
+  }
   return (
     <div className="bg-white w-full rounded-xl shadow-sm p-6">
       {/* Header */}
@@ -228,7 +231,7 @@ export default function OrderTable() {
                         <button className="w-full px-4 py-2 text-left hover:bg-gray-100">
                           Track Order
                         </button>
-                        <button className="w-full px-4 py-2 text-left hover:bg-gray-100">
+                        <button onClick={()=>handleOrderDetails(order)} className="w-full px-4 py-2 text-left hover:bg-gray-100">
                           Order Details
                         </button>
                         <button

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 
 import { IoArrowBack, IoLocationSharp } from "react-icons/io5";
@@ -12,7 +12,8 @@ import CancelOrderUI from "../../Components/CancelOrderUI";
 import toast from "react-hot-toast";
 
 export default function OrderDetails() {
-    const { id: orderId } = useParams();
+    const searchParams = useSearchParams();
+    const orderId = searchParams.get('orderId');
     const router = useRouter();
     const [order, setOrder] = useState(null);
     const [items, setItems] = useState([]);
@@ -60,76 +61,110 @@ export default function OrderDetails() {
     useEffect(() => {
         const fetchOrder = async () => {
             setLoading(true);
+            if (orderId) {
+                const { data, error } = await supabase
+                   .from("vendor_order")
+                    .select("*")
+                    .eq("id", orderId).limit(1)
+                    .single(); // 👈 convert array → object
 
-            const { data, error } = await supabase
-                .from("vendor_order")
-                .select("*")
-                .order("created_at", { ascending: false }) // latest first
-                .limit(1)
-                .single(); // 👈 convert array → object
+                if (error) {
+                    console.error(error);
+                    setLoading(false);
+                    return;
+                }
 
-            if (error) {
-                console.error(error);
+                setOrder(data);
+                userAddress(data.address)
+                setActiveStep(STATUS_STEP_MAP[data.order_status] ?? 0);
+
+                setItems(
+                    data.products.map((product, index) => ({
+                        ...product,
+                        quantity: data.product_quantities?.[index] || 1,
+                    }))
+                );
+                const createdTime = new Date(data.created_at).getTime();
+                const currentTime = Date.now();
+                const diffInSeconds = (currentTime - createdTime) / 1000;
+
+                if (diffInSeconds > 180 || data.order_status !== "pending") {
+                    setIsCancelDisabled(true);
+                }
+
                 setLoading(false);
-                return;
+            } else {
+                const { data, error } = await supabase
+                    .from("vendor_order")
+                    .select("*")
+                    .order("created_at", { ascending: false }) // latest first
+                    .limit(1)
+                    .single(); // 👈 convert array → object
+
+                if (error) {
+                    console.error(error);
+                    setLoading(false);
+                    return;
+                }
+
+                setOrder(data);
+                userAddress(data.address)
+                setActiveStep(STATUS_STEP_MAP[data.order_status] ?? 0);
+
+                setItems(
+                    data.products.map((product, index) => ({
+                        ...product,
+                        quantity: data.product_quantities?.[index] || 1,
+                    }))
+                );
+                const createdTime = new Date(data.created_at).getTime();
+                const currentTime = Date.now();
+                const diffInSeconds = (currentTime - createdTime) / 1000;
+
+                if (diffInSeconds > 180 || data.order_status !== "pending") {
+                    setIsCancelDisabled(true);
+                }
+
+                setLoading(false);
             }
 
-            setOrder(data);
-            userAddress(data.address)
-            setActiveStep(STATUS_STEP_MAP[data.order_status] ?? 0);
-
-            setItems(
-                data.products.map((product, index) => ({
-                    ...product,
-                    quantity: data.product_quantities?.[index] || 1,
-                }))
-            );
-            const createdTime = new Date(data.created_at).getTime();
-            const currentTime = Date.now();
-            const diffInSeconds = (currentTime - createdTime) / 1000;
-
-            if (diffInSeconds > 180 || data.order_status !== "pending") {
-                setIsCancelDisabled(true);
-            }
-
-            setLoading(false);
         };
 
         fetchOrder();
     }, []);
-const handleCancelOrder = async () => {
-  try {
-    setIsCancelDisabled(true);
+    const handleCancelOrder = async () => {
+        try {
+            setIsCancelDisabled(true);
 
-    const { data, error } = await supabase.rpc("cancel_order_user", {
-      p_order_id: order.id,
-      p_total_chicken_weight: order.total_chicken_weight ?? 0,
-      p_total_mutton_weight: order.total_mutton_weight ?? 0,
-    });
+            const { data, error } = await supabase.rpc("cancel_order_user", {
+                p_order_id: order.id,
+                p_total_chicken_weight: order.total_chicken_weight ?? 0,
+                p_total_mutton_weight: order.total_mutton_weight ?? 0,
+            });
 
-    if (error) {
-      console.error("Cancel failed:", error);
-      toast.error("Unable to cancel order");
-      setIsCancelDisabled(false);
-      return;
-    }
+            if (error) {
+                console.error("Cancel failed:", error);
+                toast.error("Unable to cancel order");
+                setIsCancelDisabled(false);
+                return;
+            }
 
-    // ✅ Update UI instantly
-    setOrder(prev => ({
-      ...prev,
-      order_status: "cancelled",
-    }));
+            // ✅ Update UI instantly
+            setOrder(prev => ({
+                ...prev,
+                order_status: "cancelled",
+            }));
 
-    setActiveStep(0);
-    setIsModalOpen(false);
+            setActiveStep(0);
+            setIsModalOpen(false);
 
-    toast.success("Order cancelled successfully");
+            toast.success("Order cancelled successfully");
 
-  } catch (err) {
-    console.error(err);
-    setIsCancelDisabled(false);
-  }
-};
+        } catch (err) {
+            console.error(err);
+            setIsCancelDisabled(false);
+        }
+    };
 
     const userAddress = async (addressId) => {
         const { data, error } = await supabase
@@ -153,9 +188,9 @@ const handleCancelOrder = async () => {
     if (!order) {
         return <p className="text-center py-20">Order not found</p>;
     }
-  const handleNavigateToChat = () => {
-  router.push(`/userProfile?orderId=${order.id}`);
-};
+    const handleNavigateToChat = () => {
+        router.push(`/userProfile?orderId=${order.id}`);
+    };
     return (
         <div className="min-h-screen max-w-4xl mx-auto  bg-[#F6F7FB] flex justify-center py-10 px-4">
             <div className="w-full max-w-7xl bg-white shadow-xl rounded-3xl p-8">
@@ -331,13 +366,13 @@ const handleCancelOrder = async () => {
 
                 {/* FOOTER */}
                 <div className="flex justify-center gap-4 mt-10">
-                    <button  disabled={order.status == 'completed'} className={`px-6 py-3 rounded-lg text-white btn-gradient
+                    <button disabled={order.status == 'completed'} className={`px-6 py-3 rounded-lg text-white btn-gradient
                         ${order.status == 'completed' ? "opacity-50 cursor-not-allowed" : ""}`}>
                         Track Order
                     </button>
                     <button
-                    disabled={order.status !== 'completed'}
-                      className={`px-6 py-3 rounded-lg text-white btn-gradient
+                        disabled={order.status !== 'completed'}
+                        className={`px-6 py-3 rounded-lg text-white btn-gradient
                         ${order.status !== 'completed' ? "opacity-50 cursor-not-allowed" : ""}`}>
                         Download Invoice
                     </button>
