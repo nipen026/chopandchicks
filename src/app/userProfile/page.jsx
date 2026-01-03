@@ -147,12 +147,12 @@ console.log(orderId, 'orderId');
           <div className="bg-white shadow-md rounded-2xl py-6 px-4">
             <div className="flex flex-col items-center">
               <Image
-                src="/assets/footer_logo.png"
+                src={avatarUrl || "/assets/footer_logo.png"}
                 width={90}
                 height={90}
                 draggable={false}
                 alt="User"
-                className="rounded-full w-90 h-90 object-cover"
+                className="rounded-full w-[90px] h-[90px] object-cover"
               />
               <p className="mt-3 font-medium text-gray-700 text-lg">
                 {firstName + " " + lastName}
