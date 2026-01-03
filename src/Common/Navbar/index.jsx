@@ -219,14 +219,32 @@ export default function Navbar() {
                             <span>Home</span>
                         </Link>
 
-                        <div className={`flex items-center hover:text-primary cursor-pointer gap-2 ${pathname === "/OrderDetails" ? "text-primary font-medium" : "text-black"
-                            }`} onClick={() => router.push("/OrderDetails")}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9.10009 12.9667H14.9M9.10009 9.10009H14.9M9.10009 16.8333H12.0001M2.3335 18.7666V5.23346M21.6666 18.7666V5.23346M18.7666 15.8667C18.7666 18.6004 18.7666 19.9682 17.917 20.8169C17.0682 21.6666 15.7004 21.6666 12.9667 21.6666H11.0334C8.2997 21.6666 6.93188 21.6666 6.08315 20.8169C5.23346 19.9682 5.23346 18.6004 5.23346 15.8667V12.0001M5.23346 8.13343C5.23346 5.39973 5.23346 4.03191 6.08315 3.18319C6.93188 2.3335 8.2997 2.3335 11.0334 2.3335H12.9667C15.7004 2.3335 17.0682 2.3335 17.917 3.18319C18.7666 4.03191 18.7666 5.39973 18.7666 8.13343V12.0001" stroke={pathname === "/OrderDetails" ? "#ED0213" : "#000"} stroke-width="1.44998" stroke-linecap="round" />
+                        <Link
+                            href="/OrderDetails"
+                            className={`group flex items-center gap-2 transition-colors ${pathname === "/OrderDetails"
+                                    ? "text-primary font-medium"
+                                    : "text-black hover:text-primary"
+                                }`}
+                        >
+                            <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M9.10009 12.9667H14.9M9.10009 9.10009H14.9M9.10009 16.8333H12.0001M2.3335 18.7666V5.23346M21.6666 18.7666V5.23346M18.7666 15.8667C18.7666 18.6004 18.7666 19.9682 17.917 20.8169C17.0682 21.6666 15.7004 21.6666 12.9667 21.6666H11.0334C8.2997 21.6666 6.93188 21.6666 6.08315 20.8169C5.23346 19.9682 5.23346 18.6004 5.23346 15.8667V12.0001M5.23346 8.13343C5.23346 5.39973 5.23346 4.03191 6.08315 3.18319C6.93188 2.3335 8.2997 2.3335 11.0334 2.3335H12.9667C15.7004 2.3335 17.0682 2.3335 17.917 3.18319C18.7666 4.03191 18.7666 5.39973 18.7666 8.13343V12.0001"
+                                    stroke="currentColor"
+                                    strokeWidth="1.45"
+                                    strokeLinecap="round"
+                                    className="transition-colors"
+                                />
                             </svg>
 
                             <span>Orders</span>
-                        </div>
+                        </Link>
+
 
                         <div className={`flex items-center hover:text-primary gap-2 cursor-pointer ${pathname === "/cart" ? "text-primary font-medium" : "text-black"}`} onClick={() => router.push("/cart")}>
                             <AiOutlineShopping className="text-xl" />

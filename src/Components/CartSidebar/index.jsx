@@ -7,13 +7,14 @@ import { HiMinus, HiPlus } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { supabase } from "../../lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function CartSidebar({ open, onClose }) {
     const [openDropdown, setOpenDropdown] = useState(true);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true); // ⬅ NEW
-
-    // Fetch Cart
+    const router = useRouter();
+    // Fetch Cart   
     useEffect(() => {
         const fetchCart = async () => {
             setLoading(true);
@@ -236,7 +237,7 @@ export default function CartSidebar({ open, onClose }) {
                             <div className="w-full text-center shadow-lg py-3 font-semibold bg-white border">
                                 Total : ₹{grandTotal}.00
                             </div>
-                            <button className="w-full btn-gradient text-white py-3 font-semibold">
+                            <button onClick={()=>router.push("/address")} className="w-full btn-gradient text-white py-3 font-semibold">
                                 Proceed to Checkout
                             </button>
                         </div>

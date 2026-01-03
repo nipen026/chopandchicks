@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 
-export default function CancelOrderUI({open,onClose}) {
+export default function CancelOrderUI({open,onClose,onConfirm}) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   return (
@@ -13,7 +13,7 @@ export default function CancelOrderUI({open,onClose}) {
       {/* Cancel Confirmation Modal */}
       {open && (
         <div
-          className={`fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0"
+          className={`z-[100] fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0"
             }`}
         >
          
@@ -32,7 +32,7 @@ export default function CancelOrderUI({open,onClose}) {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => {
-                  onClose();
+                  onConfirm();
                   setTimeout(() => setShowSuccessModal(true), 200);
                 }}
                 className="flex-1 bg-red-500 text-white py-2 rounded-lg font-medium hover:bg-red-600 transition"

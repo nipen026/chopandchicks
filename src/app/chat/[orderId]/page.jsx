@@ -10,20 +10,27 @@ import { useRouter, useParams } from "next/navigation";
 export default function ChatScreen() {
   const { orderId } = useParams();
   const router = useRouter();
-  const bottomRef = useRef(null);
-
+  const bottomRef = useRef(null); 
   const [user, setUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
-
+  const fileInputRef = useRef(null);
   /* 🔐 AUTH */
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data?.user);
     });
   }, []);
-
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+  
   /* 📥 FETCH MESSAGES */
   useEffect(() => {
     fetchMessages();
@@ -53,34 +60,43 @@ export default function ChatScreen() {
     setMessages(data || []);
     scrollBottom();
   };
+  useEffect(() => {
+    scrollBottom();
+  }, [messages]);
 
-  const scrollBottom = () =>
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+  const scrollBottom = () => {
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    });
+  };
 
   /* 📤 SEND MESSAGE */
   const sendMessage = async () => {
     if (!text && !image) return;
 
-    let imageUrl = null;
+    let base64Image = null;
 
     if (image) {
-      const fileName = `${Date.now()}-${image.name}`;
-      await supabase.storage.from("chat").upload(fileName, image);
-      const { data } = supabase.storage.from("chat").getPublicUrl(fileName);
-      imageUrl = data.publicUrl;
+      base64Image = await fileToBase64(image); // ✅ convert to base64
     }
 
     await supabase.from("chat_with_admin").insert({
       order_id: orderId,
-      sender_id: user.id,
-      sender_role: "user",
-      message: text,
-    //   image_url: imageUrl,
+      user_id: user.id,
+      message: text || null,
+      image_data: base64Image, // ✅ BASE64 STRING
     });
 
     setText("");
     setImage(null);
   };
+  const removeImage = () => {
+    setImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // reset input
+    }
+  };
+
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -98,62 +114,92 @@ export default function ChatScreen() {
       </div>
 
       {/* CHAT BODY */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg) => {
-          const isUser = msg.sender_role === "user";
-          return (
-            <div
-              key={msg.id}
-              className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-            >
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="min-h-full flex flex-col justify-end space-y-4">
+          {messages.map((msg) => {
+            const isUser = msg.sender_role === "user";
+            return (
               <div
-                className={`max-w-xs p-3 rounded-xl text-sm ${
-                  isUser
-                    ? "bg-red-400 text-white rounded-br-none"
-                    : "bg-red-300 text-white rounded-bl-none"
-                }`}
+                key={msg.id}
+                className={`flex ${isUser ? "justify-start" : "justify-end"}`}
               >
-                {msg.message && <p>{msg.message}</p>}
-                {msg.image_url && (
-                  <Image
-                    src={msg.image_url}
-                    alt="chat"
-                    width={150}
-                    height={150}
-                    className="rounded mt-2"
-                  />
-                )}
+                <div
+                  className={`max-w-xs p-3 rounded-xl text-sm ${isUser
+                    ? "bg-primary text-white rounded-bl-none"
+                    : "bg-primary text-white rounded-br-none"
+                    }`}
+                >
+                  {msg.message && <p>{msg.message}</p>}
+                  {msg.image_data && (
+                    <img
+                      src={msg.image_data}
+                      alt="chat"
+                      className="mt-2 rounded max-w-[150px]"
+                    />
+                  )}
+
+                </div>
               </div>
-            </div>
-          );
-        })}
-        <div ref={bottomRef} />
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
       </div>
 
       {/* INPUT */}
-      <div className="p-3 border-t flex items-center gap-3">
-        <label className="cursor-pointer">
-          <FiPlus />
+
+      <div className="p-3 border-t gap-3">
+        <div>
+          {image && (
+            <div className="relative px-3 pb-2 w-fit">
+              <img
+                src={URL.createObjectURL(image)}
+                alt="preview"
+                className="w-24 h-24 object-cover rounded-lg border"
+              />
+
+              {/* ❌ Remove button */}
+              <button
+                onClick={removeImage}
+                className="absolute -top-2 -right-2 bg-black text-white w-6 h-6 rounded-full flex items-center justify-center text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+        </div>
+        <div className="flex items-center gap-3">
+          <label className="cursor-pointer">
+            <FiPlus />
+            <input
+              type="file"
+              hidden
+              onChange={(e) => setImage(e.target.files[0])}
+            />
+          </label>
+
           <input
-            type="file"
-            hidden
-            onChange={(e) => setImage(e.target.files[0])}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Write your message"
+            className="flex-1 border rounded-full px-4 py-2 text-sm outline-none"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
           />
-        </label>
 
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Write your message"
-          className="flex-1 border rounded-full px-4 py-2 text-sm outline-none"
-        />
+          <button
+            onClick={sendMessage}
+            className="bg-red-500 p-3 rounded-full text-white"
+          >
+            <FiSend />
+          </button>
+        </div>
 
-        <button
-          onClick={sendMessage}
-          className="bg-red-500 p-3 rounded-full text-white"
-        >
-          <FiSend />
-        </button>
       </div>
     </div>
   );

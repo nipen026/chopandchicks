@@ -8,6 +8,8 @@ import { supabase } from "../../lib/supabaseClient";
 import toast from "react-hot-toast";
 import OrderDetails from "../OrderDetails/page";
 import OrderTable from "../../Components/OrderTable";
+import { useParams, useSearchParams } from "next/navigation";
+import ChatScreen from "../../Components/ChatScreen";
 
 export default function ProfilePage() {
   const [active, setActive] = useState("profile");
@@ -21,7 +23,17 @@ export default function ProfilePage() {
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
+const searchParams = useSearchParams();
+const orderId = searchParams.get('orderId');
 
+console.log(orderId, 'orderId');
+  useEffect(()=>{
+    if(orderId){
+      // Fetch order details using orderId
+      setActive("orders");
+    }
+  },[orderId])
+  
   // ---------------- Fetch Logged-in User ----------------
   useEffect(() => {
     const fetchUser = async () => {
@@ -115,12 +127,12 @@ export default function ProfilePage() {
 
   // ---------------- Logout ----------------
   const handleLogout = async () => {
-      localStorage.removeItem("auth-token");
-      localStorage.removeItem("userId");
-      let { error } = await supabase.auth.signOut();
-      toast.error(error.message);
-      window.location.reload();
-      window.location.href = "/";
+    localStorage.removeItem("auth-token");
+    localStorage.removeItem("userId");
+    let { error } = await supabase.auth.signOut();
+    toast.error(error.message);
+    window.location.reload();
+    window.location.href = "/";
   };
 
   return (
@@ -249,7 +261,7 @@ export default function ProfilePage() {
                     Email*
                   </label>
                   <input
-                   disabled={email ? true : false}
+                    disabled={email ? true : false}
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -291,9 +303,13 @@ export default function ProfilePage() {
           </div>)}
 
         {/* ---------------- Orders Section ---------------- */}
-        {active === "orders" && (
-          <OrderTable/>
-  )}
+        {active === "orders" && !orderId && (
+          <OrderTable />
+        )}
+        {
+         active === "orders" && orderId && <ChatScreen orderId={orderId} />
+        }
+
       </div>
     </div>
   );

@@ -29,8 +29,18 @@ const paymentStyles = {
 };
 
 export default function OrderTable() {
+  const PAGE_SIZE = 5;
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeAction, setActiveAction] = useState(null);
+
+  const [sortOpen, setSortOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("date_desc");
+
+
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
@@ -65,6 +75,26 @@ export default function OrderTable() {
 
     fetchOrders();
   }, []);
+  const sortedOrders = [...orders].sort((a, b) => {
+    switch (sortBy) {
+      case "name":
+        return (a.products?.[0]?.name || "").localeCompare(
+          b.products?.[0]?.name || ""
+        );
+      case "size":
+        return (b.products?.length || 0) - (a.products?.length || 0);
+      case "date_asc":
+        return new Date(a.created_at) - new Date(b.created_at);
+      default:
+        return new Date(b.created_at) - new Date(a.created_at);
+    }
+  });
+  const totalPages = Math.ceil(sortedOrders.length / PAGE_SIZE);
+
+  const paginatedOrders = sortedOrders.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="bg-white w-full rounded-xl shadow-sm p-6">
@@ -74,115 +104,180 @@ export default function OrderTable() {
           Profile Settings
         </h2>
 
-        <button className="border border-primary px-4 py-1.5 rounded-full text-sm text-primary flex items-center gap-2 hover:bg-gray-50">
-          Sort By
-          <span className="text-xs"><MdOutlineKeyboardArrowDown /></span>
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setSortOpen(!sortOpen)}
+            className="border border-primary px-4 py-1.5 rounded-full text-sm text-primary flex items-center gap-2"
+          >
+            Sort By <MdOutlineKeyboardArrowDown />
+          </button>
+
+          {sortOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md z-20">
+              {[
+                { label: "Newest", value: "date_desc" },
+                { label: "Oldest", value: "date_asc" },
+                { label: "Name", value: "name" },
+                { label: "Size", value: "size" },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setSortBy(opt.value);
+                    setSortOpen(false);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-spacing-y-4 text-sm">
-          <thead>
-            <tr className="text-gray-500 border-b">
-              <th className="py-3 font-medium text-left">Order ID</th>
-              <th className="py-3 font-medium text-left">Products</th>
-              <th className="py-3 font-medium text-left">Status</th>
-              <th className="py-3 font-medium text-left">Payment Method</th>
-              <th className="py-3 font-medium text-left">Amount</th>
-              <th className="py-3 font-medium text-center">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {orders.map((order, i) => (
-              <tr
-                key={order.id}
-                className="border-b last:border-none hover:bg-gray-50 transition"
-              >
-                {/* Order ID */}
-                <td className="py-4">
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src={order.products?.[0]?.image?.image_url || "/assets/product.jpg"}
-                      alt="product"
-                      width={40}
-                      height={40}
-                      className="rounded-lg object-cover"
-                    />
-                    <div>
-                      <p className="font-medium capitalize text-gray-800">
-                       {order.products?.[0]?.name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(order.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-
-                {/* Products */}
-                <td className="py-4 text-gray-500">
-                  {order.products?.length || 0} Product
-                </td>
-
-                {/* Status */}
-                <td className="py-4">
-                  <span
-                    className={`px-3 py-1 w-[130px] capitalize rounded-lg text-xs border font-medium ${statusStyles[order.order_status]
-                      }`}
-                  >
-                    {order.order_status}
-                  </span>
-                </td>
-
-                {/* Payment */}
-                <td className="py-4">
-                  <span className="px-4 py-1 rounded-full text-xs font-medium bg-gray-100">
-                    {order.paid_via === "razorpay" ? "Razorpay" : "Cash"}
-                  </span>
-                </td>
-
-                {/* Amount */}
-                <td className="py-4 font-medium text-gray-700">
-                  ₹{order.total_amount}
-                </td>
-
-                {/* Action */}
-                <td className="py-4 text-center">
-                  <button
-                    disabled={order.isCancelDisabled}
-                    className={`w-6 h-6 rounded-full text-white btn-gradient
-          ${order.isCancelDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                    title={
-                      order.isCancelDisabled
-                        ? "Cancel available only within 3 minutes"
-                        : "View / Cancel"
-                    }
-                  >
-                    i
-                  </button>
-                </td>
+      <div className="">
+        {!loading && orders.length === 0 ? (
+          <div className="py-20 text-center text-gray-400">
+            <p className="text-lg font-medium">No orders found</p>
+            <p className="text-sm">You haven’t placed any orders yet.</p>
+          </div>
+        ) : (
+          <table className="w-full border-spacing-y-4 text-sm">
+            <thead>
+              <tr className="text-gray-500 border-b">
+                <th className="py-3 font-medium text-left">Order ID</th>
+                <th className="py-3 font-medium text-left">Products</th>
+                <th className="py-3 font-medium text-left">Status</th>
+                <th className="py-3 font-medium text-left">Payment Method</th>
+                <th className="py-3 font-medium text-left">Amount</th>
+                <th className="py-3 font-medium text-center">Action</th>
               </tr>
-            ))}
+            </thead>
 
-          </tbody>
-        </table>
+            <tbody>
+              {paginatedOrders.map((order, i) => (
+                <tr
+                  key={order.id}
+                  className="border-b cursor-pointer last:border-none hover:bg-gray-50 transition"
+                >
+                  {/* Order ID */}
+                  <td className="py-4">
+                    <div className="flex items-center gap-3">
+                      <Image
+                        src={order.products?.[0]?.image?.image_url || "/assets/product.jpg"}
+                        alt="product"
+                        width={40}
+                        height={40}
+                        className="rounded-lg object-cover"
+                      />
+                      <div>
+                        <p className="font-medium capitalize text-gray-800">
+                          {order.products?.[0]?.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(order.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Products */}
+                  <td className="py-4 text-gray-500">
+                    {order.products?.length || 0} Product
+                  </td>
+
+                  {/* Status */}
+                  <td className="py-4">
+                    <span
+                      className={`px-3 py-1 w-[130px] capitalize rounded-lg text-xs border font-medium ${statusStyles[order.order_status]
+                        }`}
+                    >
+                      {order.order_status}
+                    </span>
+                  </td>
+
+                  {/* Payment */}
+                  <td className="py-4">
+                    <span className="px-4 py-1 rounded-full text-xs font-medium bg-gray-100">
+                      {order.paid_via === "razorpay" ? "Razorpay" : "Cash"}
+                    </span>
+                  </td>
+
+                  {/* Amount */}
+                  <td className="py-4 font-medium text-gray-700">
+                    ₹{order.total_amount}
+                  </td>
+
+                  {/* Action */}
+                  <td className="py-4 text-center relative">
+                    <button
+                      onClick={() =>
+                        setActiveAction(activeAction === order.id ? null : order.id)
+                      }
+                      className="w-7 h-7 rounded-full btn-gradient text-white"
+                    >
+                      ⋮
+                    </button>
+
+                    {activeAction === order.id && (
+                      <div className="absolute right-8 top-10 bg-white border rounded-lg shadow-md w-40 z-20">
+                        <button className="w-full px-4 py-2 text-left hover:bg-gray-100">
+                          Track Order
+                        </button>
+                        <button className="w-full px-4 py-2 text-left hover:bg-gray-100">
+                          Order Details
+                        </button>
+                        <button
+                          disabled={order.isCancelDisabled}
+                          className={`w-full px-4 py-2 text-left ${order.isCancelDisabled
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-red-500 hover:bg-gray-100"
+                            }`}
+                        >
+                          Cancel Order
+                        </button>
+                      </div>
+                    )}
+                  </td>
+
+                </tr>
+              ))}
+
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-6 text-sm text-gray-500">
-        <p>Showing 1 to 4 of 20 results</p>
+      {orders.length > 0 && (
+        <div className="flex items-center justify-between mt-6 text-sm">
+          <p>
+            Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+            {Math.min(currentPage * PAGE_SIZE, orders.length)} of{" "}
+            {orders.length}
+          </p>
 
-        <div className="flex items-center gap-2">
-          <button className="w-7 h-7 rounded-full btn-gradient text-white">
-            1
-          </button>
-          <button className="w-7 h-7 rounded-full border border-primary">2</button>
-          <span>...</span>
-          <button className="w-7 h-7 rounded-full border border-primary">5</button>
+          <div className="flex gap-2">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`w-7 h-7 rounded-full ${currentPage === i + 1
+                    ? "btn-gradient text-white"
+                    : "border border-primary"
+                  }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
     </div>
   );
 }

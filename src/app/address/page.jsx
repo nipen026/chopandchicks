@@ -4,6 +4,7 @@ import PaymentMethod from "../../Components/PaymentMethod";
 import React, { useEffect, useState } from "react";
 import { MdHome, MdWork, MdLocationOn } from "react-icons/md";
 import { supabase } from "../../lib/supabaseClient";
+import Checkout from "../../Components/Checkout";
 
 export default function Address() {
     const [addresses, setAddresses] = useState([]);
@@ -23,8 +24,19 @@ export default function Address() {
         setShowModal(true);
     };
 
-    const openEdit = (addr) => {
-        setCurrentAddress({ ...addr });
+    const openEdit = async (addr) => {
+        let { data, error } = await supabase
+            .from('user_address')
+            .select('*')
+            .eq('id', addr)
+            .single();
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        setCurrentAddress({ ...data });
         setIsEditMode(true);
         setShowModal(true);
     };
@@ -49,7 +61,7 @@ export default function Address() {
             }
 
             // Build correct address_line field
-            
+
 
             const payload = {
                 p_id: isEditMode ? currentAddress.id : null,
@@ -125,42 +137,47 @@ export default function Address() {
                         <h2 className="text-2xl font-semibold mb-6">SAVED ADDRESS</h2>
 
                         {/* Address List */}
-                        <div className="space-y-6">
-                            {addresses.map((addr) => {
-                                console.log(addr);
+                        <div
+                            className={`grid gap-6 ${addresses.length === 1
+                                ? "grid-cols-1"
+                                : "grid-cols-1 "
+                                }`}
+                        >
+                            <div
+                                className="rounded-xl p-4 w-full cursor-pointer transition-all border-2"
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-sm font-medium text-black">Shipping Address</p>
 
-                                return (
-                                    <div
-                                        key={addr.id}
-                                        onClick={() => handleSelectAddress(addr.id)}
-                                        className={`rounded-xl p-4 cursor-pointer transition-all border-2`}
-                                    >
-
-                                        <div className="flex items-center justify-between mb-3">
-                                            <p className="text-sm font-medium text-black">Shipping Address</p>
-
-                                            <div className="flex items-center gap-3 text-red-500 text-sm font-medium">
-                                                <button onClick={() => openEdit(addr)}>Edit</button>
-                                                {addresses.length < maxAddresses && (
-                                                    <button onClick={openAddNew}>Add New</button>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className={selectedAddressId === addr.id ? "border-2 border-primary border rounded-lg p-4 bg-gray-50 text-sm leading-6" : "border border-gray-300 rounded-lg p-4 bg-gray-50 text-sm leading-6"}>
+                                    <div className="flex items-center gap-3 text-red-500 text-sm font-medium">
+                                        <button onClick={() => openEdit(selectedAddressId)}>Edit</button>
+                                        {addresses.length < maxAddresses && (
+                                            <button onClick={openAddNew}>Add New</button>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 flex">
+                                    {addresses.map((addr) => (
+                                        <div
+                                            onClick={() => handleSelectAddress(addr.id)}
+                                            className={`rounded-lg p-4 bg-gray-50 text-sm leading-6 ${selectedAddressId === addr.id
+                                                ? "border-2 border-primary"
+                                                : "border border-gray-300"
+                                                }`}
+                                        >
                                             <p>{addr.full_name}</p>
                                             <p>{addr.contact_number}</p>
-                                            <p>{addr.city},</p>
-                                            <p>{addr.state},</p>
-                                            <p>{addr.country},</p>
+                                            <p>{addr.city}, {addr.state}</p>
+                                            <p>{addr.country}</p>
                                             <p>{addr.address_line}</p>
                                             <p>{addr.postal_code}</p>
-                                            <p>{addr.address_type}</p>
+                                            <p className="capitalize">{addr.address_type}</p>
                                         </div>
-                                    </div>
-                                )
-                            })}
+                                    ))}
+                                </div>
+                            </div>
                         </div>
+
 
                         {/* Save Checkbox */}
                         <div className="flex items-center gap-3 mt-6">
@@ -174,10 +191,10 @@ export default function Address() {
                                 ('payment')
                             }>SHIP TO THIS ADDRESS</button>
                         </div>
-                    </div> : <PaymentMethod />}
+                    </div> : <Checkout />}
 
                 {/* Steps */}
-                <div className="ml-12 hidden md:flex flex-col items-start ">
+                <div className={`${method === 'payment' ? 'hidden' : ' ml-12 md:flex flex-col items-start'} `}>
                     <div className="flex items-center gap-3">
                         <div className="bg-[#E5E5E5] p-1 rounded-full"><div className={`w-4 h-4 rounded-full ${method == 'shipping' ? 'btn-gradient' : 'bg-[#A6A6A6]'} `}></div></div>
                         <span className="text-sm font-medium text-gray-800">Choose Address</span>
@@ -192,7 +209,7 @@ export default function Address() {
 
             {/* POPUP MODAL */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4 transition-opacity duration-300">
+                <div className="fixed z-[100] inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4 transition-opacity duration-300">
                     <div className="bg-white w-full max-w-4xl rounded-2xl p-6 relative flex gap-6 animate-[zoomIn_0.25s_ease]">
 
                         <style>{`

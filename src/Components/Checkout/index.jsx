@@ -6,11 +6,12 @@ import { IoIosArrowDown } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
 import { HiMinus, HiPlus } from "react-icons/hi";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 export default function Checkout() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
-
+    const [addressId, setAddressId] = useState(null);
     // Delivery
     const [scheduleType, setScheduleType] = useState("instant"); // instant | schedule
     const [hour, setHour] = useState("10");
@@ -19,7 +20,13 @@ export default function Checkout() {
 
     // Payment
     const [paymentMethod, setPaymentMethod] = useState("netbanking");
-    const addressId = localStorage.getItem("selected_address_id");
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const id = localStorage.getItem("selected_address_id");
+            setAddressId(id);
+        }
+    }, []);
+
 
     /* ---------------- CART ---------------- */
     useEffect(() => {
@@ -40,52 +47,56 @@ export default function Checkout() {
         loadCart();
     }, []);
 
-const buildInsertOrderPayload = async ({
-  paidVia,
-  paymentId = null,
-  paymentData = null,
-}) => {
-  const { data: { user } } = await supabase.auth.getUser();
+    const buildInsertOrderPayload = async ({
+        paidVia,
+        paymentId = null,
+        paymentData = null,
+    }) => {
+        const { data: { user } } = await supabase.auth.getUser();
 
-  return {
-    p_user_id: user.id,
-    p_address: addressId,
-    p_products_uuid: items.map(i => i.id),
-    p_product_quantities: items.map(i => i.qty),
-    p_item_total: subtotal,
-    p_tax_amount: tax,
-    p_delivery_fee: 0,
-    p_packaging_fee: 0,
-    p_total_amount: total,
-    p_paid_via: paidVia,          // "cod" | "razorpay"
-    p_payment_id: paymentId,
-    p_payment_data: paymentData,
-    p_schedule_time:
-      scheduleType === "schedule"
-        ? `${hour}:${minute} ${ampm}`
-        : null,
-    p_nearby_vendors: null,
-  };
-};
-const placeCODOrder = async () => {
-  setLoading(true);
+        return {
+            p_user_id: user.id,
+            p_address: addressId,
+            p_products_uuid: items.map(i => i.id),
+            p_product_quantities: items.map(i => i.qty),
+            p_item_total: subtotal,
+            p_tax_amount: tax,
+            p_delivery_fee: 0,
+            p_packaging_fee: 0,
+            p_total_amount: total,
+            p_paid_via: paidVia,          // "cod" | "razorpay"
+            p_payment_id: paymentId,
+            p_payment_data: paymentData,
+            p_schedule_time:
+                scheduleType === "schedule"
+                    ? `${hour}:${minute} ${ampm}`
+                    : null,
+            p_nearby_vendors: null,
+        };
+    };
+    const placeCODOrder = async () => {
+        setLoading(true);
 
-  const payload = await buildInsertOrderPayload({
-    paidVia: "cod",
-  });
+        const payload = await buildInsertOrderPayload({
+            paidVia: "cod",
+        });
 
-  const { data, error } = await supabase.rpc("insert_order", payload);
+        const { data, error } = await supabase.rpc("insert_order", payload);
 
-  setLoading(false);
+        setLoading(false);
 
-  if (error) {
-    console.error("COD order failed:", error);
-    alert("Failed to place order");
-    return;
-  }
+        if (error) {
+            console.error("COD order failed:", error);
+            toast.error("Failed to place order");
+            return;
+        }
 
-  alert("Order placed successfully (Cash on Delivery)");
-};
+        // ✅ CLEAR CART AFTER SUCCESS
+        await clearUserCart();
+
+        toast.success("Order placed successfully (Cash on Delivery)");
+    };
+
 
 
     /* ---------------- RAZORPAY ---------------- */
@@ -98,48 +109,61 @@ const placeCODOrder = async () => {
             document.body.appendChild(script);
         });
 
-  const payWithRazorpay = async () => {
-  setLoading(true);
+    const payWithRazorpay = async () => {
+        setLoading(true);
 
-  const loaded = await loadRazorpay();
-  if (!loaded) {
-    alert("Razorpay SDK failed to load");
-    setLoading(false);
-    return;
-  }
+        const loaded = await loadRazorpay();
+        if (!loaded) {
+            toast.error("Razorpay SDK failed to load");
+            setLoading(false);
+            return;
+        }
 
-  const options = {
-    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-    amount: Math.round(total * 100),
-    currency: "INR",
-    name: "Chop & Chicks",
+        const options = {
+            key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+            amount: Math.round(total * 100),
+            currency: "INR",
+            name: "Chop & Chicks",
 
-    handler: async (response) => {
-      const payload = await buildInsertOrderPayload({
-        paidVia: "razorpay",
-        paymentId: response.razorpay_payment_id,
-        paymentData: response,
-      });
+            handler: async (response) => {
+                const payload = await buildInsertOrderPayload({
+                    paidVia: "razorpay",
+                    paymentId: response.razorpay_payment_id,
+                    paymentData: response,
+                });
 
-      const { error } = await supabase.rpc("insert_order", payload);
+                const { error } = await supabase.rpc("insert_order", payload);
 
-      if (error) {
-        console.error("Order save failed:", error);
-        alert("Payment done, but order not saved");
-        return;
-      }
+                if (error) {
+                    console.error("Order save failed:", error);
+                    toast.error("Payment done, but order not saved");
+                    return;
+                }
+                await clearUserCart();
+                toast.success("Payment successful & order placed 🎉");
+            },
+        };
 
-      alert("Payment successful & order placed 🎉");
-    },
-  };
-
-  new window.Razorpay(options).open();
-  setLoading(false);
-};
+        new window.Razorpay(options).open();
+        setLoading(false);
+    };
 
 
     /* ---------------- COD ---------------- */
-  
+
+    const clearUserCart = async () => {
+        const { error } = await supabase.rpc("clear_user_cart");
+
+        if (error) {
+            console.error("Failed to clear cart:", error);
+            return false;
+        }
+
+        // Clear UI cart immediately
+        setItems([]);
+        return true;
+    };
+
 
     /* ---------------- SUBMIT ---------------- */
     const placeOrder = () => {
@@ -399,10 +423,10 @@ const placeCODOrder = async () => {
 
                                 <div className="space-y-3 pt-3">
                                     <label className="flex items-center gap-3 cursor-pointer">
-                                        <input type="radio" name="cod" className="accent-red-600" /> Cash on delivery
+                                        <input type="radio" name="cod" className="accent-red-600" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} /> Cash on delivery
                                     </label>
                                     <label className="flex items-center gap-3 cursor-pointer">
-                                        <input type="radio" name="cod" className="accent-red-600" /> Pay using UPI
+                                        <input type="radio" name="cod" className="accent-red-600" checked={paymentMethod === "upi"} onChange={() => setPaymentMethod("upi")} /> Pay using UPI
                                     </label>
                                 </div>
                             </div>

@@ -9,6 +9,7 @@ import { FiMessageSquare } from "react-icons/fi";
 import { FaUserCircle } from "react-icons/fa";
 import { CiLocationOn } from "react-icons/ci";
 import CancelOrderUI from "../../Components/CancelOrderUI";
+import toast from "react-hot-toast";
 
 export default function OrderDetails() {
     const { id: orderId } = useParams();
@@ -96,6 +97,39 @@ export default function OrderDetails() {
 
         fetchOrder();
     }, []);
+const handleCancelOrder = async () => {
+  try {
+    setIsCancelDisabled(true);
+
+    const { data, error } = await supabase.rpc("cancel_order_user", {
+      p_order_id: order.id,
+      p_total_chicken_weight: order.total_chicken_weight ?? 0,
+      p_total_mutton_weight: order.total_mutton_weight ?? 0,
+    });
+
+    if (error) {
+      console.error("Cancel failed:", error);
+      toast.error("Unable to cancel order");
+      setIsCancelDisabled(false);
+      return;
+    }
+
+    // ✅ Update UI instantly
+    setOrder(prev => ({
+      ...prev,
+      order_status: "cancelled",
+    }));
+
+    setActiveStep(0);
+    setIsModalOpen(false);
+
+    toast.success("Order cancelled successfully");
+
+  } catch (err) {
+    console.error(err);
+    setIsCancelDisabled(false);
+  }
+};
 
     const userAddress = async (addressId) => {
         const { data, error } = await supabase
@@ -119,9 +153,11 @@ export default function OrderDetails() {
     if (!order) {
         return <p className="text-center py-20">Order not found</p>;
     }
-
+  const handleNavigateToChat = () => {
+  router.push(`/userProfile?orderId=${order.id}`);
+};
     return (
-        <div className="min-h-screen bg-[#F6F7FB] flex justify-center py-10 px-4">
+        <div className="min-h-screen max-w-4xl mx-auto  bg-[#F6F7FB] flex justify-center py-10 px-4">
             <div className="w-full max-w-7xl bg-white shadow-xl rounded-3xl p-8">
 
                 {/* HEADER */}
@@ -136,7 +172,7 @@ export default function OrderDetails() {
                         <h1 className="text-2xl font-semibold">Order Details</h1>
                     </div>
 
-                    <button className="flex items-center gap-2 hover:bg-red-50 transition border px-4 py-2 rounded-full text-red-600 border-red-500">
+                    <button className="flex items-center gap-2 hover:bg-red-50 transition border px-4 py-2 rounded-full text-red-600 border-red-500" onClick={() => handleNavigateToChat()}>
                         <FiMessageSquare />
                         Chat with us
                     </button>
@@ -235,13 +271,9 @@ export default function OrderDetails() {
                                     <div>
                                         <div>
                                             <p className="font-semibold text-[#47474A]">Delivery Address</p>
-                                            <div className="flex items-center gap-2">
-                                                <p>{address?.flat_house_building},</p>
-                                                <p>{address?.address_line},</p>
-                                                <p>{address?.landmark},</p>
-                                                <p>{address?.city},</p>
-                                                <p>{address?.state},</p>
-                                                <p>{address?.country},</p>
+                                            <div className=" items-center gap-2">
+                                                <p>{address?.flat_house_building},{address?.address_line},{address?.landmark},</p>
+                                                <p>{address?.city},{address?.state},{address?.country},</p>
                                                 <p>{address?.postal_code}</p>
                                             </div>
                                         </div>
@@ -299,10 +331,14 @@ export default function OrderDetails() {
 
                 {/* FOOTER */}
                 <div className="flex justify-center gap-4 mt-10">
-                    <button disabled className="btn-gradient px-6 py-3 rounded-lg text-white">
+                    <button  disabled={order.status == 'completed'} className={`px-6 py-3 rounded-lg text-white btn-gradient
+                        ${order.status == 'completed' ? "opacity-50 cursor-not-allowed" : ""}`}>
                         Track Order
                     </button>
-                    <button className="btn-gradient px-6 py-3 rounded-lg text-white">
+                    <button
+                    disabled={order.status !== 'completed'}
+                      className={`px-6 py-3 rounded-lg text-white btn-gradient
+                        ${order.status !== 'completed' ? "opacity-50 cursor-not-allowed" : ""}`}>
                         Download Invoice
                     </button>
                     <button
@@ -319,7 +355,7 @@ export default function OrderDetails() {
                         Order can only be cancelled within 3 minutes
                     </p>
                 )}
-                <CancelOrderUI open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+                <CancelOrderUI onConfirm={handleCancelOrder} open={isModalOpen} onClose={() => setIsModalOpen(false)} />
             </div>
         </div>
     );
