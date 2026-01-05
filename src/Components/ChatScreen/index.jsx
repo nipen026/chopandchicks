@@ -14,6 +14,18 @@ export default function ChatScreen({ orderId }) {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     const [image, setImage] = useState(null);
+    const [orderDetails, setOrderDetails] = useState()
+    useEffect(() => {
+        const fetchOrder = async () => {
+            const { data, error } = await supabase
+                .from("vendor_order")
+                .select("*")
+                .eq("id", orderId).limit(1)
+                .single(); // 👈 convert array → object
+            setOrderDetails(data)
+        }
+        fetchOrder();
+    },[])
     const fileInputRef = useRef(null);
     /* 🔐 AUTH */
     useEffect(() => {
@@ -50,6 +62,8 @@ export default function ChatScreen({ orderId }) {
     }, []);
 
     const fetchMessages = async () => {
+
+
         const { data } = await supabase
             .from("chat_with_admin")
             .select("*")
@@ -59,18 +73,18 @@ export default function ChatScreen({ orderId }) {
         setMessages(data || []);
         // scrollBottom();
     };
-      useEffect(() => {
+    useEffect(() => {
         scrollBottom();
-      }, [messages]);
+    }, [messages]);
 
-      const scrollBottom = () => {
+    const scrollBottom = () => {
         requestAnimationFrame(() => {
-           bottomRef.current?.scrollIntoView({
-    behavior: "smooth",
-    block: "end",
-  });
+            bottomRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+            });
         });
-      };
+    };
 
     /* 📤 SEND MESSAGE */
     const sendMessage = async () => {
@@ -86,6 +100,8 @@ export default function ChatScreen({ orderId }) {
             order_id: orderId,
             user_id: user.id,
             message: text || null,
+            is_from_admin: true,
+            vendor_id:orderDetails?.vendor_id ? orderDetails?.vendor_id : null,
             image_data: base64Image, // ✅ BASE64 STRING
         });
 
@@ -99,8 +115,8 @@ export default function ChatScreen({ orderId }) {
         }
     };
 
-const USER_AVATAR = user?.user_metadata?.avatar_url; // user image
-const ADMIN_LOGO = "/assets/header_logo.png"; // admin/support logo
+    const USER_AVATAR = user?.user_metadata?.avatar_url; // user image
+    const ADMIN_LOGO = "/assets/header_logo.png"; // admin/support logo
 
     return (
         <div className="flex w-full flex-col h-[70vh] bg-white">
@@ -119,61 +135,61 @@ const ADMIN_LOGO = "/assets/header_logo.png"; // admin/support logo
 
             {/* CHAT BODY */}
             <div className="flex-1 overflow-y-auto scroll-hidden p-4">
-                <div  className="min-h-full flex flex-col justify-end space-y-4">
+                <div className="min-h-full flex flex-col justify-end space-y-4">
                     {messages.map((msg) => {
                         const isUser = msg.sender_role === "user";
                         return (
                             <>
-                            <div
-                                key={msg.id}
-                                className={`flex items-end gap-2 ${isUser ? "justify-start" : "justify-end"
-                                    }`}
-                            >
-                                {/* USER IMAGE (LEFT) */}
-                                {isUser && (
-                                    <Image
-                                        src={ADMIN_LOGO}
-                                        alt="user"
-                                        width={32}
-                                        height={32}
-                                        className="rounded-full w-[20px] h-[20px] object-cover"
-                                    />
-                                )}
-
-                                {/* MESSAGE BUBBLE */}
                                 <div
-                                    className={`max-w-xs p-3 rounded-xl text-sm ${isUser
-                                            ? "bg-primary text-white rounded-bl-none"
-                                            : "bg-primary text-white rounded-br-none"
+                                    key={msg.id}
+                                    className={`flex items-end gap-2 ${isUser ? "justify-start" : "justify-end"
                                         }`}
                                 >
-                                    {msg.message && <p>{msg.message}</p>}
-
-                                    {msg.image_data && (
-                                        <img
-                                            src={msg.image_data}
-                                            alt="chat"
-                                            className="mt-2 rounded max-w-[150px]"
+                                    {/* USER IMAGE (LEFT) */}
+                                    {isUser && (
+                                        <Image
+                                            src={ADMIN_LOGO}
+                                            alt="user"
+                                            width={32}
+                                            height={32}
+                                            className="rounded-full w-[20px] h-[20px] object-cover"
                                         />
                                     )}
+
+                                    {/* MESSAGE BUBBLE */}
+                                    <div
+                                        className={`max-w-xs p-3 rounded-xl text-sm ${isUser
+                                            ? "bg-primary text-white rounded-bl-none"
+                                            : "bg-primary text-white rounded-br-none"
+                                            }`}
+                                    >
+                                        {msg.message && <p>{msg.message}</p>}
+
+                                        {msg.image_data && (
+                                            <img
+                                                src={msg.image_data}
+                                                alt="chat"
+                                                className="mt-2 rounded max-w-[150px]"
+                                            />
+                                        )}
+                                    </div>
+                                    {/* ADMIN LOGO (RIGHT) */}
+                                    {!isUser && (
+                                        <Image
+                                            src={USER_AVATAR}
+                                            alt="admin"
+                                            width={32}
+                                            height={32}
+                                            className="rounded-full w-[20px] h-[20px] object-cover"
+                                        />
+                                    )}
+                                    <div className="m-0" ref={bottomRef} />
                                 </div>
-                                {/* ADMIN LOGO (RIGHT) */}
-                                {!isUser && (
-                                    <Image
-                                    src={USER_AVATAR}
-                                    alt="admin"
-                                    width={32}
-                                    height={32}
-                                    className="rounded-full w-[20px] h-[20px] object-cover"
-                                    />
-                                )}
-                                <div className="m-0" ref={bottomRef}/>
-                            </div>
                             </>
                         );
                     })}
 
-                    
+
                 </div>
             </div>
 

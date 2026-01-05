@@ -385,11 +385,11 @@ export default function OrderDetails() {
                     </button>
 
                 </div>
-                {isCancelDisabled && (
+                {/* {isCancelDisabled && (
                     <p className="text-sm text-red-500 mt-4 text-center">
                         Order can only be cancelled within 3 minutes
                     </p>
-                )}
+                )} */}
                 <CancelOrderUI onConfirm={handleCancelOrder} open={isModalOpen} onClose={() => setIsModalOpen(false)} />
             </div>
         </div>
