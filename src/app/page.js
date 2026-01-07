@@ -37,17 +37,20 @@ export default function Home() {
     slidesToScroll: 1,
     dots: false,
     fade: true,
+    autoplay: true,
+autoplaySpeed: 3000
+
   };
 
   return (
     <>
       <div className="container mt-10">
-        {/* <Slider {...settings}>
+        <Slider {...settings}>
           {banner?.map((item, i) => (
-            <img key={i} src={item?.thumbnail_url} className="w-full h-[300px] object-contain" alt="Banner" />
+            <img key={i} src={item?.thumbnail_url} className="w-full h-[300px] object-cover" alt="Banner" />
           ))}
-        </Slider> */}
-         <img src="/assets/banner.png" draggable={false} className="w-full"/>
+        </Slider>
+         {/* <img src="/assets/banner.png" draggable={false} className="w-full"/> */}
       </div>
 
       <CategorySection />
