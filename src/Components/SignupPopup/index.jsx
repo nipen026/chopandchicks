@@ -54,22 +54,39 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
   // --------------------------------
   // Email Validation
   // --------------------------------
-  const validateEmailForm = () => {
-    const errs = {};
+const validateEmailForm = () => {
+  const errs = {};
+  const strongPasswordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
 
-    if (!email.trim()) errs.email = "Email is required";
-    else if (!/^\S+@\S+\.\S+$/.test(email)) errs.email = "Invalid email";
+  if (!email.trim()) {
+    errs.email = "Email is required";
+  } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+    errs.email = "Invalid email address";
+  }
 
-    if (!password) errs.password = "Password is required";
-    else if (password.length < 6) errs.password = "Password must be 6+ chars";
+  if (!password) {
+    errs.password = "Password is required";
+  } else if (password.length < 8) {
+    errs.password = "Password must be at least 8 characters";
+  } else if (!strongPasswordRegex.test(password)) {
+    errs.password = "Use uppercase, lowercase, number & special character";
+  }
 
-    if (!confirmPassword) errs.confirmPassword = "Confirm password";
-    else if (password !== confirmPassword) errs.confirmPassword = "Passwords do not match";
+  if (!confirmPassword) {
+    errs.confirmPassword = "Confirm password is required";
+  } else if (password !== confirmPassword) {
+    errs.confirmPassword = "Passwords do not match";
+  }
 
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+  setErrors(errs);
+  return Object.keys(errs).length === 0;
+};
+
+  const preventCopyPaste = (e) => {
+    e.preventDefault();
+    toast.error("Copy / Paste is not allowed for security reasons");
   };
-
   // --------------------------------
   // Phone Validation
   // --------------------------------
@@ -167,10 +184,13 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
             </button>
 
             {/* Logo */}
-            <div className="flex justify-center mb-4">
+            {/* <div className="flex justify-center mb-4">
               <img src="/assets/footer_logo.png" alt="logo" draggable={false} className="w-28 h-28 object-cover" />
-            </div>
-
+            </div> */}
+            <h2 className="text-center text-3xl font-semibold text-black">Sign Up</h2>
+            <p className="text-center text-gray-500 text-sm mb-6">
+              Sign up to continue to our website
+            </p>
             {/* Tabs */}
             <div className="grid grid-cols-2 mb-6 gap-10 pb-2">
               <button
@@ -237,6 +257,10 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
                     placeholder="Confirm password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    onPaste={preventCopyPaste}
+                    onCopy={preventCopyPaste}
+                    onCut={preventCopyPaste}
+                    autoComplete="new-password"
                   />
                   <span
                     className="absolute right-4 top-10 cursor-pointer text-gray-500"
@@ -244,6 +268,10 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
                   >
                     {showConfirmPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                   </span>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Must include uppercase, lowercase, number & special character
+                  </p>
+
                   {errors.confirmPassword && (
                     <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
                   )}
@@ -261,7 +289,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
 
                 {/* Google */}
                 <div className="flex justify-center mt-4">
-                  <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition">
+                  <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition" onClick={loginWithGoogle}>
                     <FcGoogle size={40} />
                   </button>
                 </div>
@@ -270,7 +298,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
                 <div className="text-center text-black mt-5">
                   <p>By registering, you agree to our</p>
                   <p>
-                   <a href="/terms-of-use" className="text-primary underline" >Terms of service</a> and{" "}
+                    <a href="/terms-of-use" className="text-primary underline" >Terms of service</a> and{" "}
                     <a href="/privacyPolicy" className="text-primary underline">Privacy Policy</a>
                   </p>
                 </div>
@@ -307,7 +335,7 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
 
                 {/* Google Login */}
                 <div className="flex justify-center mt-4">
-                  <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition">
+                  <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition" onClick={loginWithGoogle}>
                     <FcGoogle size={40} />
                   </button>
                 </div>

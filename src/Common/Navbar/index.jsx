@@ -55,18 +55,23 @@ export default function Navbar() {
         }
     }, [searchParams]);
     // 🟢 Auto-refresh token after login
-    useEffect(() => {
-        const handleStorageChange = () => {
-            setToken(localStorage.getItem("auth-token"));
-        };
+  useEffect(() => {
+  const syncAuth = () => {
+    const t = localStorage.getItem("auth-token");
+    setToken(t);
+  };
 
-        window.addEventListener("storage", handleStorageChange);
+  // initial load
+  syncAuth();
 
-        // First load
-        handleStorageChange();
+  // same-tab auth updates
+  window.addEventListener("auth-change", syncAuth);
 
-        return () => window.removeEventListener("storage", handleStorageChange);
-    }, []);
+  return () => {
+    window.removeEventListener("auth-change", syncAuth);
+  };
+}, []);
+
     useEffect(() => {
         if (!navigator.geolocation) {
             setLocation({
@@ -122,18 +127,13 @@ export default function Navbar() {
             }
         );
     }, []);
-    useEffect(() => {
-        if (!token && pathname === "/cart") {
-            // optional: remember where user wanted to go
-            sessionStorage.setItem("redirectAfterLogin", "/cart");
-
-            // open login modal
-            setIsLogin(true);
-
-            // redirect user to home page
-            router.replace("/", { scroll: false });
-        }
-    }, [pathname, token, router]);
+useEffect(() => {
+  if (!token && pathname === "/cart") {
+    sessionStorage.setItem("redirectAfterLogin", "/cart");
+    setIsLogin(true);
+    router.replace("/", { scroll: false });
+  }
+}, [pathname, token]);
 
     // 🟢 Sidebar animation
     const sidebarClass = openMenu

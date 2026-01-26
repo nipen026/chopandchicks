@@ -1,37 +1,47 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import Navbar from "../Common/Navbar";
 import { Toaster } from "react-hot-toast";
-import Loader from "../Components/Loader";
 
 export default function NavbarClient() {
   useEffect(() => {
+    // Initial session check (on refresh)
     supabase.auth.getSession().then(({ data }) => {
-      console.log("Session:", data.session);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth changed:", session);
-      const localStorage = window.localStorage;
-      const authToken = localStorage.getItem("auth-token");
-      if ( session?.access_token) {
-        localStorage.setItem("auth-token", JSON.stringify(session?.access_token));
-        localStorage.setItem("userId", session?.user?.id);
+      if (data.session?.access_token) {
+        localStorage.setItem("auth-token", data.session.access_token);
+        localStorage.setItem("userId", data.session.user.id);
       } else {
         localStorage.removeItem("auth-token");
         localStorage.removeItem("userId");
       }
-
     });
+
+    // Listen auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.access_token) {
+          localStorage.setItem("auth-token", session.access_token);
+          localStorage.setItem("userId", session.user.id);
+        } else {
+          localStorage.removeItem("auth-token");
+          localStorage.removeItem("userId");
+        }
+
+        // 🔥 notify same tab
+        window.dispatchEvent(new Event("auth-change"));
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   return (
     <>
-      <Suspense fallback={null}>
-        <Navbar />
-      </Suspense>
+      <Navbar />
       <Toaster />
     </>
   );

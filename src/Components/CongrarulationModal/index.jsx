@@ -24,6 +24,7 @@ export default function CongratulationModal({ open, onClose,setIsLogin }) {
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
               Congrats! You have created your account.
             </h2>
+            <p>Check Your mail account.After back to login.</p>
 
             <button
               onClick={()=>{onClose(); setIsLogin(true);}}

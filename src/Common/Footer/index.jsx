@@ -58,7 +58,7 @@ export default function Footer() {
       </div>
 
       <div className="text-center text-md mt-5 pt-5 border-[#CD8412] border-t opacity-80">
-        &copy; Copyright 2025 Chop and Chicks | All Rights Reserved
+        &copy; Copyright {new Date().getFullYear()} Chop and Chicks | All Rights Reserved
       </div>
     </footer>
   );

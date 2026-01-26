@@ -16,6 +16,20 @@ export default function CartSidebar({ open, onClose }) {
     const router = useRouter();
     // Fetch Cart   
     useEffect(() => {
+  if (open) {
+    // lock background scroll
+    document.body.style.overflow = "hidden";
+  } else {
+    // restore scroll
+    document.body.style.overflow = "";
+  }
+
+  // cleanup on unmount
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [open]);
+    useEffect(() => {
         const fetchCart = async () => {
             setLoading(true);
 

@@ -8,8 +8,9 @@ import { supabase } from "../../lib/supabaseClient";
 import toast from "react-hot-toast";
 import OrderDetails from "../OrderDetails/page";
 import OrderTable from "../../Components/OrderTable";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import ChatScreen from "../../Components/ChatScreen";
+
 
 export default function ProfilePage() {
   const [active, setActive] = useState("profile");
@@ -23,17 +24,22 @@ export default function ProfilePage() {
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
-const searchParams = useSearchParams();
-const orderId = searchParams.get('orderId');
-
-console.log(orderId, 'orderId');
-  useEffect(()=>{
-    if(orderId){
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId');
+  const [emailLocked, setEmailLocked] = useState(false);
+  const [phoneLocked, setPhoneLocked] = useState(false);
+  const nameRegex = /^[A-Za-z\s]*$/;
+  const phoneRegex = /^[0-9]*$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const router = useRouter();
+  console.log(orderId, 'orderId');
+  useEffect(() => {
+    if (orderId) {
       // Fetch order details using orderId
       setActive("orders");
     }
-  },[orderId])
-  
+  }, [orderId])
+
   // ---------------- Fetch Logged-in User ----------------
   useEffect(() => {
     const fetchUser = async () => {
@@ -48,9 +54,12 @@ console.log(orderId, 'orderId');
 
         setFirstName(f || "");
         setLastName(l || "");
-        setEmail(u.email || "");
+        setEmail(u.email || u.new_email);
         setPhone(u.user_metadata?.phone || "");
         setAvatarUrl(u.user_metadata?.avatar_url || null);
+        setEmailLocked(!!u.email || !!u.new_email);
+        setPhoneLocked(!!u.user_metadata?.phone);
+
       }
     };
 
@@ -60,12 +69,33 @@ console.log(orderId, 'orderId');
   // ---------------- Update Profile API ----------------
   const handleUpdate = async () => {
     setMsg("");
+
+    if (!firstName.trim()) {
+      setMsg("First name is required");
+      return;
+    }
+
+    if (!lastName.trim()) {
+      setMsg("Last name is required");
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setMsg("Please enter a valid email address");
+      return;
+    }
+
+    if (phone && phone.length !== 10) {
+      setMsg("Phone number must be 10 digits");
+      return;
+    }
+
     setLoading(true);
 
     const full_name = `${firstName} ${lastName}`;
 
     const { data, error } = await supabase.auth.updateUser({
-      email: email,
+      email,
       data: {
         full_name,
         phone,
@@ -82,6 +112,7 @@ console.log(orderId, 'orderId');
     setMsg("Profile updated successfully!");
     setUser(data.user);
   };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !user) return;
@@ -127,12 +158,11 @@ console.log(orderId, 'orderId');
 
   // ---------------- Logout ----------------
   const handleLogout = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem("auth-token");
     localStorage.removeItem("userId");
-    let { error } = await supabase.auth.signOut();
-    toast.error(error.message);
-    window.location.reload();
-    window.location.href = "/";
+    window.dispatchEvent(new Event("auth-change"));
+    router.push("/");
   };
 
   return (
@@ -239,7 +269,13 @@ console.log(orderId, 'orderId');
                   <input
                     type="text"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    maxLength={10}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (nameRegex.test(value)) {
+                        setFirstName(value);
+                      }
+                    }}
                     className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
                   />
                 </div>
@@ -251,7 +287,13 @@ console.log(orderId, 'orderId');
                   <input
                     type="text"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    maxLength={10}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (nameRegex.test(value)) {
+                        setLastName(value);
+                      }
+                    }}
                     className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
                   />
                 </div>
@@ -261,12 +303,13 @@ console.log(orderId, 'orderId');
                     Email*
                   </label>
                   <input
-                    disabled={email ? true : false}
                     type="email"
+                    disabled={emailLocked}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
                   />
+
                 </div>
 
                 <div>
@@ -274,22 +317,28 @@ console.log(orderId, 'orderId');
                     Phone*
                   </label>
                   <input
-                    disabled={phone ? true : false}
+                    disabled={phoneLocked}
                     type="text"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    maxLength={10}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (phoneRegex.test(value)) {
+                        setPhone(value);
+                      }
+                    }}
                     className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
                   />
+
                 </div>
               </div>
 
               {/* ---------------- Success / Error Message ---------------- */}
               {msg && (
-                <p className="text-center mt-5 text-green-600 font-medium">
+                <p className="text-center mt-5 text-red-600 font-medium">
                   {msg}
                 </p>
               )}
-
               <div className="flex justify-center mt-10">
                 <button
                   onClick={handleUpdate}
@@ -307,7 +356,7 @@ console.log(orderId, 'orderId');
           <OrderTable />
         )}
         {
-         active === "orders" && orderId && <ChatScreen orderId={orderId} />
+          active === "orders" && orderId && <ChatScreen orderId={orderId} />
         }
 
       </div>

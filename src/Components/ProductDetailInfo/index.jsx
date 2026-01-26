@@ -13,12 +13,85 @@ import { usePathname, useRouter } from "next/navigation";
 export default function ProductDetailInfo({ setOpenCart, product }) {
     const [userId, setUserId] = useState("");
     const router = useRouter();
-    const pathname = usePathname()
+    const pathname = usePathname();
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [loadingBookmark, setLoadingBookmark] = useState(false);
+
     // ✔ FIX: load userId safely on client
     useEffect(() => {
         const id = localStorage.getItem("user_account_id");
         if (id) setUserId(id);
     }, []);
+    useEffect(() => {
+        const checkBookmark = async () => {
+            if (!product?.id) return;
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data } = await supabase
+                .from("user_bookmarks")
+                .select("id")
+                .eq("user_id", user.id)
+                .eq("product_id", product.id)
+                .single();
+
+            if (data) setIsBookmarked(true);
+        };
+
+        checkBookmark();
+    }, [product?.id]);
+    const toggleBookmark = async () => {
+        if (loadingBookmark) return;
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            router.push(`${pathname}?login=true`);
+            return;
+        }
+
+        setLoadingBookmark(true);
+
+        if (isBookmarked) {
+            // ❌ Remove bookmark
+            await supabase
+                .from("user_bookmarks")
+                .delete()
+                .eq("user_id", user.id)
+                .eq("product_id", product.id);
+
+            setIsBookmarked(false);
+        } else {
+            // ✅ Add bookmark
+            await supabase
+                .from("user_bookmarks")
+                .insert({
+                    user_id: user.id,
+                    product_id: product.id,
+                });
+
+            setIsBookmarked(true);
+        }
+
+        setLoadingBookmark(false);
+    };
+    const resetService = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            router.push(`${pathname}?login=true`);
+            return;
+        }
+
+        const { error } = await supabase
+            .from("user_services")
+            .delete()
+            .eq("user_id", user.id)
+            .eq("product_id", product.id);
+
+        if (!error) {
+            console.log("Service reset successfully");
+        }
+    };
 
     const addToCart = async () => {
         if (!product?.id) return;
@@ -78,13 +151,26 @@ export default function ProductDetailInfo({ setOpenCart, product }) {
                     </h2>
 
                     <div className="flex items-center space-x-4 text-xl">
-                        <div className="bg-[#EDEDED] p-2 rounded-full">
-                            <BsBookmark className="cursor-pointer text-gray-500 hover:text-red-600" />
+                        {/* Bookmark */}
+                        <div
+                            onClick={toggleBookmark}
+                            className="bg-[#EDEDED] p-2 rounded-full cursor-pointer"
+                        >
+                            <BsBookmark
+                                className={`transition ${isBookmarked ? "text-red-600" : "text-gray-500"
+                                    }`}
+                            />
                         </div>
-                        <div className="bg-[#EDEDED] p-2 rounded-full">
-                            <BsArrowRepeat className="cursor-pointer text-gray-500 hover:text-red-600" />
+
+                        {/* Reset */}
+                        <div
+                            onClick={resetService}
+                            className="bg-[#EDEDED] p-2 rounded-full cursor-pointer"
+                        >
+                            <BsArrowRepeat className="text-gray-500 hover:text-red-600 transition" />
                         </div>
                     </div>
+
                 </div>
 
                 {/* Tags */}

@@ -153,36 +153,39 @@ export default function LoginModal({ open, onClose, setIsSignUp, setIsForgot }) 
                                 {errors && (
                                     <p className="text-red-600 text-sm mb-3 text-center">{errors}</p>
                                 )}
-                                <div className="mb-4">
-                                    <label className="block text-sm font-semibold text-black mb-1">Email *</label>
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="Enter your email"
-                                        className="w-full text-black  border border-gray-300 rounded-lg px-4 py-3
+                                <form autoComplete="off">
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-semibold text-black mb-1">Email *</label>
+                                        <input
+                                            type="email"
+                                            autoComplete="off"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="Enter your email"
+                                            className="w-full text-black  border border-gray-300 rounded-lg px-4 py-3
                                         focus:border-red-500 outline-none transition"
-                                    />
-                                </div>
+                                        />
+                                    </div>
 
-                                {/* Password */}
-                                <div className="mb-5 relative">
-                                    <label className="block text-sm font-semibold text-black mb-1">Password *</label>
-                                    <input
-                                        type={showConfirmPass ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter password"
-                                        className="relative w-full text-black border border-gray-300 rounded-lg px-4 py-3
+                                    {/* Password */}
+                                    <div className="mb-5 relative">
+                                        <label className="block text-sm font-semibold text-black mb-1">Password *</label>
+                                        <input
+                                            autoComplete="off"
+                                            type={showConfirmPass ? "text" : "password"}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Enter password"
+                                            className="relative w-full text-black border border-gray-300 rounded-lg px-4 py-3
                                         focus:border-red-500 outline-none transition"
-                                    />
-                                    <span
-                                        className="absolute right-4 top-10 cursor-pointer text-gray-500"
-                                        onClick={() => setShowConfirmPass(!showConfirmPass)}>
-                                        {showConfirmPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                                    </span>
-                                </div>
-
+                                        />
+                                        <span
+                                            className="absolute right-4 top-10 cursor-pointer text-gray-500"
+                                            onClick={() => setShowConfirmPass(!showConfirmPass)}>
+                                            {showConfirmPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                        </span>
+                                    </div>
+                                </form>
                                 {/* Error Message */}
                                 {errMsg && (
                                     <p className="text-red-600 text-sm mb-3 text-center">{errMsg}</p>

@@ -1,64 +1,93 @@
 "use client";
 import Image from "next/image";
+import { BsCheckCircleFill } from "react-icons/bs";
 
 export default function DownloadAppSection() {
   return (
     <section className="container bg-[#F5F7FA] py-16">
-      <div className=" mx-auto px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 items-center gap-12">
+      <div className="mx-auto px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 items-center gap-12">
 
         {/* Left Side Content */}
         <div>
           <h2 className="text-4xl md:text-5xl font-medium text-gray-900 mb-6">
-            Download the App
+            Download Our App
           </h2>
 
-          <p className="text-gray-600 leading-relaxed mb-8 max-w-md">
-            Lorem ipsum dolor sit amet consectetur. Imperdiet elementum mattis tristique
-            velit enim parturient. Morbi leo mi at amet tempus. Leo ante lorem cursus
-            tristique. Nulla urna faucibus mauris tristique elementum mauris platea.
+          <p className="text-gray-600 leading-relaxed mb-6 max-w-md">
+            Get fresh, hygienic chicken and mutton delivered straight to your
+            doorstep with just a few taps.
           </p>
+
+          {/* Features List */}
+          <ul className="space-y-4 mb-8">
+            <li className="flex items-start gap-3">
+              <BsCheckCircleFill className="text-green-600 mt-1" />
+              <span className="text-gray-700">
+                Freshly slaughtered chicken & mutton
+              </span>
+            </li>
+
+            <li className="flex items-start gap-3">
+              <BsCheckCircleFill className="text-green-600 mt-1" />
+              <span className="text-gray-700">
+                Choose preferred cuts and delivery slots
+              </span>
+            </li>
+
+            <li className="flex items-start gap-3">
+              <BsCheckCircleFill className="text-green-600 mt-1" />
+              <span className="text-gray-700">
+                Live order tracking from processing to delivery
+              </span>
+            </li>
+
+            <li className="flex items-start gap-3">
+              <BsCheckCircleFill className="text-green-600 mt-1" />
+              <span className="text-gray-700">
+                Secure payments via UPI, cards & net banking
+              </span>
+            </li>
+
+            <li className="flex items-start gap-3">
+              <BsCheckCircleFill className="text-green-600 mt-1" />
+              <span className="text-gray-700">
+                Fast, reliable same-day delivery
+              </span>
+            </li>
+          </ul>
 
           {/* Store Buttons */}
           <div className="flex items-center gap-4">
-            <button>
-              <Image
-                src="/assets/app_banner.png"
-                alt="App Store"
-                width={170}
-                height={50}
-                draggable={false}
-              />
-            </button>
+            <Image
+              src="/assets/app_banner.png"
+              alt="Download on App Store"
+              width={170}
+              height={50}
+              draggable={false}
+            />
 
-            <button>
-              <Image
-                src="/assets/play_banner.png"
-                alt="Google Play"
-                width={180}
-                draggable={false}
-                height={50}
-              />
-            </button>
+            <Image
+              src="/assets/play_banner.png"
+              alt="Get it on Google Play"
+              width={180}
+              height={50}
+              draggable={false}
+            />
           </div>
         </div>
 
-        {/* Right Side Mobile Screens */}
-        <div className="flex justify-center md:justify-end items-end relative gap-4">
-          {/* Back Left Image */}
-
-
-          {/* Main Center Image */}
+        {/* Right Side Image */}
+        <div className="flex justify-center md:justify-end">
           <Image
             src="/assets/footer_banner.png"
-            alt="App Screen"
+            alt="App Preview"
             width={500}
-            height={200}
+            height={300}
             draggable={false}
-            className="rounded-xl fit-cover  z-10"
+            className="rounded-xl object-cover"
           />
-
-
         </div>
+
       </div>
     </section>
   );
