@@ -1,6 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+
 import { FiSearch } from "react-icons/fi";
 import { HiOutlineHome } from "react-icons/hi";
 import { BsReceiptCutoff } from "react-icons/bs";
@@ -10,140 +14,95 @@ import { IoMdClose } from "react-icons/io";
 import { LuUserRound } from "react-icons/lu";
 import { RxHamburgerMenu } from "react-icons/rx";
 
-import Link from "next/link";
-import { use, useEffect, useState } from "react";
-
 import SignupPopup from "../../Components/SignupPopup";
 import OtpVerificationModal from "../../Components/OtpVerificationModal";
 import LoginModal from "../../Components/LoginModal";
 import ForgotPasswordModal from "../../Components/ForgotPasswordModal/ForgotPasswordModal";
 import CongratulationModal from "../../Components/CongrarulationModal";
 import CreateAccountModal from "../../Components/CreateAccountPopup";
-
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import LoginQueryHandler from "../../Components/LoginQueryHandler";
 
 export default function Navbar() {
+    const router = useRouter();
+    const pathname = usePathname();
+
     const [isSignUp, setIsSignUp] = useState(false);
     const [isOtp, setIsOtp] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [isForgot, setIsForgot] = useState(false);
     const [isLast, setIsLast] = useState(false);
+    const [createAccountModal, setCreateAccountModal] = useState(false);
+
     const [token, setToken] = useState(null);
     const [phoneNumber, setPhoneNumber] = useState();
-    const [createAccountModal, setCreateAccountModal] = useState(false);
+    const [openMenu, setOpenMenu] = useState(false);
+    const [showMobileSearch, setShowMobileSearch] = useState(false);
+
     const [location, setLocation] = useState({
         city: "Detecting...",
         address: "",
     });
 
-    const [openMenu, setOpenMenu] = useState(false);
-    const [showMobileSearch, setShowMobileSearch] = useState(false);
-
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+    /* 🔐 Auth sync */
     useEffect(() => {
-        const loginParam = searchParams.get("login");
-        if (loginParam === "true") {
+        const syncAuth = () => {
+            setToken(localStorage.getItem("auth-token"));
+        };
+
+        syncAuth();
+        window.addEventListener("auth-change", syncAuth);
+        return () => window.removeEventListener("auth-change", syncAuth);
+    }, []);
+
+    /* 🔁 Redirect cart → login */
+    useEffect(() => {
+        if (!token && pathname === "/cart") {
+            sessionStorage.setItem("redirectAfterLogin", "/cart");
             setIsLogin(true);
-
-            // Remove the query param without refreshing
-            const newParams = new URLSearchParams(searchParams.toString());
-            newParams.delete("login");
-
-            router.replace(`${pathname}?${newParams.toString()}`, { scroll: false });
+            router.replace("/", { scroll: false });
         }
-    }, [searchParams]);
-    // 🟢 Auto-refresh token after login
-  useEffect(() => {
-  const syncAuth = () => {
-    const t = localStorage.getItem("auth-token");
-    setToken(t);
-  };
+    }, [pathname, token]);
 
-  // initial load
-  syncAuth();
-
-  // same-tab auth updates
-  window.addEventListener("auth-change", syncAuth);
-
-  return () => {
-    window.removeEventListener("auth-change", syncAuth);
-  };
-}, []);
-
+    /* 📍 Location */
     useEffect(() => {
-        if (!navigator.geolocation) {
-            setLocation({
-                city: "Location not supported",
-                address: "",
-            });
-            return;
-        }
+        if (!navigator.geolocation) return;
 
         navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords;
-
+            async ({ coords }) => {
                 try {
-                    // Reverse geocoding using OpenStreetMap
                     const res = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}`
                     );
-
                     const data = await res.json();
 
-                    const city =
-                        data.address.city ||
-                        data.address.town ||
-                        data.address.village ||
-                        data.address.state ||
-                        "Unknown location";
-
-                    const address = data.display_name;
-
                     setLocation({
-                        city,
-                        address,
+                        city:
+                            data.address.city ||
+                            data.address.town ||
+                            data.address.village ||
+                            "Unknown",
+                        address: data.display_name,
                     });
-                } catch (error) {
-                    console.error("Location fetch failed", error);
-                    setLocation({
-                        city: "Unable to fetch",
-                        address: "",
-                    });
+                } catch {
+                    setLocation({ city: "Unavailable", address: "" });
                 }
             },
-            (error) => {
-                console.error("Geolocation error", error);
-                setLocation({
-                    city: "Permission denied",
-                    address: "",
-                });
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-            }
+            () => setLocation({ city: "Permission denied", address: "" })
         );
     }, []);
-useEffect(() => {
-  if (!token && pathname === "/cart") {
-    sessionStorage.setItem("redirectAfterLogin", "/cart");
-    setIsLogin(true);
-    router.replace("/", { scroll: false });
-  }
-}, [pathname, token]);
-
-    // 🟢 Sidebar animation
     const sidebarClass = openMenu
         ? "translate-x-0"
         : "-translate-x-full";
-    console.log(token, "token");
-
     return (
-        <div className="z-[100] sticky container mt-5 top-0">
-            {/* MAIN NAVBAR */}
+        <div className="z-[100] sticky top-0 container mt-5">
+
+            {/* ✅ SAFE: Suspense ONLY around query handler */}
+            <Suspense fallback={null}>
+                <LoginQueryHandler onLogin={setIsLogin} />
+            </Suspense>
+
+            {/* NAVBAR UI (unchanged logic) */}
+            {/* --- your existing JSX below remains exactly same --- */}
             <div className="w-full bg-white shadow-md py-3 px-4 md:px-6 md:rounded-full rounded-2xl">
                 <div className="flex items-center justify-between gap-6">
                     {/* LEFT */}
@@ -222,8 +181,8 @@ useEffect(() => {
                         <Link
                             href="/OrderDetails"
                             className={`group flex items-center gap-2 transition-colors ${pathname === "/OrderDetails"
-                                    ? "text-primary font-medium"
-                                    : "text-black hover:text-primary"
+                                ? "text-primary font-medium"
+                                : "text-black hover:text-primary"
                                 }`}
                         >
                             <svg
@@ -382,6 +341,7 @@ useEffect(() => {
                 setPhoneNumber={setPhoneNumber}
                 setIsLast={setIsLast}
             />
+
             <OtpVerificationModal
                 open={isOtp}
                 onClose={() => setIsOtp(false)}
@@ -389,24 +349,27 @@ useEffect(() => {
                 number={phoneNumber}
                 setCreateAccountModal={setCreateAccountModal}
             />
+
             <LoginModal
                 open={isLogin}
                 onClose={() => setIsLogin(false)}
                 setIsSignUp={setIsSignUp}
                 setIsForgot={setIsForgot}
             />
+
             <ForgotPasswordModal
                 open={isForgot}
                 onClose={() => setIsForgot(false)}
-                setIsSignUp={setIsSignUp}
                 setIsLogin={setIsLogin}
-                setIsLast={setIsLast}
+                setIsSignUp={setIsSignUp}
             />
+
             <CongratulationModal
                 open={isLast}
                 onClose={() => setIsLast(false)}
                 setIsLogin={setIsLogin}
             />
+
             <CreateAccountModal
                 open={createAccountModal}
                 onClose={() => setCreateAccountModal(false)}
