@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
 // Icons
-import { FiMail, FiPhone, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiMail, FiPhone, FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 
 // Phone Input
@@ -31,7 +31,9 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
   const [errors, setErrors] = useState({});
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
-  const router = useRouter()
+  const [emailSent, setEmailSent] = useState(false); // NEW: Track email verification state
+  const router = useRouter();
+
   // Popup animation
   useEffect(() => {
     if (open) {
@@ -49,44 +51,46 @@ export default function SignupPopup({ open, onClose, setIsOtp, setPhoneNumber, s
     setPassword("");
     setConfirmPassword("");
     setErrors({});
+    setEmailSent(false); // Reset email sent state
   };
 
   // --------------------------------
   // Email Validation
   // --------------------------------
-const validateEmailForm = () => {
-  const errs = {};
-  const strongPasswordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
+  const validateEmailForm = () => {
+    const errs = {};
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/;
 
-  if (!email.trim()) {
-    errs.email = "Email is required";
-  } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-    errs.email = "Invalid email address";
-  }
+    if (!email.trim()) {
+      errs.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      errs.email = "Invalid email address";
+    }
 
-  if (!password) {
-    errs.password = "Password is required";
-  } else if (password.length < 8) {
-    errs.password = "Password must be at least 8 characters";
-  } else if (!strongPasswordRegex.test(password)) {
-    errs.password = "Use uppercase, lowercase, number & special character";
-  }
+    if (!password) {
+      errs.password = "Password is required";
+    } else if (password.length < 8) {
+      errs.password = "Password must be at least 8 characters";
+    } else if (!strongPasswordRegex.test(password)) {
+      errs.password = "Use uppercase, lowercase, number & special character";
+    }
 
-  if (!confirmPassword) {
-    errs.confirmPassword = "Confirm password is required";
-  } else if (password !== confirmPassword) {
-    errs.confirmPassword = "Passwords do not match";
-  }
+    if (!confirmPassword) {
+      errs.confirmPassword = "Confirm password is required";
+    } else if (password !== confirmPassword) {
+      errs.confirmPassword = "Passwords do not match";
+    }
 
-  setErrors(errs);
-  return Object.keys(errs).length === 0;
-};
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   const preventCopyPaste = (e) => {
     e.preventDefault();
     toast.error("Copy / Paste is not allowed for security reasons");
   };
+
   // --------------------------------
   // Phone Validation
   // --------------------------------
@@ -104,7 +108,7 @@ const validateEmailForm = () => {
   };
 
   // --------------------------------
-  // EMAIL SIGNUP
+  // EMAIL SIGNUP - FIXED VERSION
   // --------------------------------
   const handleEmailSignup = async () => {
     if (!validateEmailForm()) return;
@@ -114,20 +118,26 @@ const validateEmailForm = () => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`, // Important: Set redirect URL
+      },
     });
 
     setLoading(false);
 
     if (error) {
-      toast.error(error.message);
+      // Handle specific errors
+      if (error.message.includes("already registered")) {
+        toast.error("This email is already registered. Please login instead.");
+      } else {
+        toast.error(error.message);
+      }
       return;
     }
 
-    toast.success("Account created! Check your mail.");
-    setIsLast(true);
-
-    onClose();
-    handleReset();
+    // Show verification screen instead of closing
+    setEmailSent(true);
+    toast.success("Verification email sent! Please check your inbox.");
   };
 
   // --------------------------------
@@ -159,9 +169,25 @@ const validateEmailForm = () => {
 
   // Google Login
   const loginWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
+
+    if (error) {
+      toast.error(error.message);
+    }
+  };
+
+  // NEW: Handle going back to login after email verification
+  const handleBackToLogin = () => {
+    setEmailSent(false);
+    handleReset();
+    onClose();
+    // You might want to trigger opening the login popup here
+    // setIsLast(false); // or whatever triggers the login popup
   };
 
   return (
@@ -183,171 +209,230 @@ const validateEmailForm = () => {
               ✕
             </button>
 
-            {/* Logo */}
-            {/* <div className="flex justify-center mb-4">
-              <img src="/assets/footer_logo.png" alt="logo" draggable={false} className="w-28 h-28 object-cover" />
-            </div> */}
-            <h2 className="text-center text-3xl font-semibold text-black">Sign Up</h2>
-            <p className="text-center text-gray-500 text-sm mb-6">
-              Sign up to continue to our website
-            </p>
-            {/* Tabs */}
-            <div className="grid grid-cols-2 mb-6 gap-10 pb-2">
-              <button
-                onClick={() => setActiveTab("email")}
-                className={`justify-center flex items-center gap-2 pb-2 
-                ${activeTab === "email" ? "text-red-600 border-b-2 border-red-600" : "text-gray-500"}`}
-              >
-                <FiMail size={18} /> Email
-              </button>
-
-              <button
-                onClick={() => setActiveTab("phone")}
-                className={`flex items-center justify-center gap-2 pb-2 
-                ${activeTab === "phone" ? "text-red-600 border-b-2 border-red-600" : "text-gray-500"}`}
-              >
-                <FiPhone size={18} /> Phone
-              </button>
-            </div>
-
-            {/* Errors */}
-            {errors.api && <p className="text-red-500 text-sm mb-3">{errors.api}</p>}
-
-            {/* EMAIL FORM */}
-            {activeTab === "email" && (
-              <>
-                {/* Email */}
-                <div className="mb-4">
-                  <label className="font-semibold text-black text-sm">Email *</label>
-                  <input
-                    type="email"
-                    className="w-full mt-1 text-black px-4 py-3 border focus:border-red-500 outline-none rounded-xl"
-                    placeholder="Enter email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {/* EMAIL VERIFICATION SUCCESS SCREEN */}
+            {emailSent ? (
+              <div className="text-center py-8">
+                <div className="flex justify-center mb-6">
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                    <FiCheckCircle className="text-green-600 text-5xl" />
+                  </div>
                 </div>
 
-                {/* Password */}
-                <div className="mb-4 relative">
-                  <label className="font-semibold text-black text-sm">Password *</label>
-                  <input
-                    type={showPass ? "text" : "password"}
-                    className="w-full mt-1 px-4 py-3 border rounded-xl outline-none focus:border-red-500"
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <span
-                    className="absolute right-4 top-10 cursor-pointer text-gray-500"
-                    onClick={() => setShowPass(!showPass)}
-                  >
-                    {showPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                  </span>
-                  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-                </div>
+                <h2 className="text-2xl font-bold text-black mb-4">
+                  Verify Your Email
+                </h2>
 
-                {/* Confirm Password */}
-                <div className="mb-6 relative">
-                  <label className="font-semibold text-black text-sm">Confirm Password *</label>
-                  <input
-                    type={showConfirmPass ? "text" : "password"}
-                    className="w-full mt-1 px-4 py-3 border rounded-xl outline-none focus:border-red-500"
-                    placeholder="Confirm password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    onPaste={preventCopyPaste}
-                    onCopy={preventCopyPaste}
-                    onCut={preventCopyPaste}
-                    autoComplete="new-password"
-                  />
-                  <span
-                    className="absolute right-4 top-10 cursor-pointer text-gray-500"
-                    onClick={() => setShowConfirmPass(!showConfirmPass)}
-                  >
-                    {showConfirmPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                  </span>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Must include uppercase, lowercase, number & special character
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <p className="text-gray-700 mb-2">
+                    We've sent a verification link to:
                   </p>
-
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
-                  )}
+                  <p className="font-semibold text-black text-lg mb-3">{email}</p>
+                  <p className="text-sm text-gray-600">
+                    Please check your inbox and click the verification link to activate your account.
+                  </p>
                 </div>
 
-                {/* Submit */}
-                <button
-                  className="w-full bg-primary text-white font-semibold py-3 rounded-full text-lg flex justify-center items-center gap-2"
-                  disabled={loading}
-                  onClick={handleEmailSignup}
-                >
-                  {loading && <span className="loader"></span>}
-                  {loading ? "Creating..." : "Sign Up"}
-                </button>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-gray-700">
+                    <strong>Important:</strong> You cannot login until you verify your email.
+                    The link expires in 24 hours.
+                  </p>
+                </div>
 
-                {/* Google */}
-                <div className="flex justify-center mt-4">
-                  <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition" onClick={loginWithGoogle}>
-                    <FcGoogle size={40} />
+                <div className="space-y-3">
+                  <button
+                    onClick={handleBackToLogin}
+                    className="w-full bg-primary text-white font-semibold py-3 rounded-full text-lg hover:bg-red-700 transition"
+                  >
+                    Back to Login
+                  </button>
+
+                  <button
+                    onClick={handleReset}
+                    className="w-full border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-full text-lg hover:bg-gray-50 transition"
+                  >
+                    Sign up with different email
                   </button>
                 </div>
 
-                {/* Terms */}
-                <div className="text-center text-black mt-5">
-                  <p>By registering, you agree to our</p>
-                  <p>
-                    <a href="/terms-of-use" className="text-primary underline" >Terms of service</a> and{" "}
-                    <a href="/privacyPolicy" className="text-primary underline">Privacy Policy</a>
-                  </p>
-                </div>
-              </>
-            )}
-
-            {/* PHONE FORM */}
-            {activeTab === "phone" && (
+                <p className="text-xs text-gray-500 mt-4">
+                  Didn't receive the email? Check your spam folder or contact support.
+                </p>
+              </div>
+            ) : (
               <>
-                <div className="mb-4">
-                  <label className="font-semibold text-black text-sm">Mobile No *</label>
-                  <PhoneInput
-                    country={"in"}
-                    value={phone}
-                    onChange={setPhone}
-                    inputClass="!w-full !h-[48px] !rounded-lg"
-                    containerClass="!w-full"
-                    buttonClass="!bg-white !rounded-s-lg"
-                    dropdownClass="text-black"
-                    placeholder="Enter Mobile Number"
-                  />
-                  {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-                </div>
+                {/* NORMAL SIGNUP FORM */}
+                <h2 className="text-center text-3xl font-semibold text-black">Sign Up</h2>
+                <p className="text-center text-gray-500 text-sm mb-6">
+                  Sign up to continue to our website
+                </p>
 
-                {/* Send OTP */}
-                <button
-                  className="w-full btn-gradient text-white font-semibold py-3 rounded-full text-lg flex justify-center items-center gap-2"
-                  disabled={loading}
-                  onClick={handleSendOtp}
-                >
-                  {loading && <span className="loader"></span>}
-                  {loading ? "Sending OTP..." : "Send OTP"}
-                </button>
+                {/* Tabs */}
+                <div className="grid grid-cols-2 mb-6 gap-10 pb-2">
+                  <button
+                    onClick={() => setActiveTab("email")}
+                    className={`justify-center flex items-center gap-2 pb-2 
+                    ${activeTab === "email" ? "text-red-600 border-b-2 border-red-600" : "text-gray-500"}`}
+                  >
+                    <FiMail size={18} /> Email
+                  </button>
 
-                {/* Google Login */}
-                <div className="flex justify-center mt-4">
-                  <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition" onClick={loginWithGoogle}>
-                    <FcGoogle size={40} />
+                  <button
+                    onClick={() => setActiveTab("phone")}
+                    className={`flex items-center justify-center gap-2 pb-2 
+                    ${activeTab === "phone" ? "text-red-600 border-b-2 border-red-600" : "text-gray-500"}`}
+                  >
+                    <FiPhone size={18} /> Phone
                   </button>
                 </div>
 
-                {/* Terms */}
-                <div className="text-center text-black mt-5">
-                  <p>By registering, you agree to our</p>
-                  <p>
-                    <a href="/terms-of-use" className="text-primary underline" >Terms of service</a> and{" "}
-                    <a href="/privacyPolicy" className="text-primary underline">Privacy Policy</a>
-                  </p>
-                </div>
+                {/* Errors */}
+                {errors.api && <p className="text-red-500 text-sm mb-3">{errors.api}</p>}
+
+                {/* EMAIL FORM */}
+                {activeTab === "email" && (
+                  <>
+                    {/* Email */}
+                    <div className="mb-4">
+                      <label className="font-semibold text-black text-sm">Email *</label>
+                      <input
+                        type="email"
+                        className="w-full mt-1 text-black px-4 py-3 border focus:border-red-500 outline-none rounded-xl"
+                        placeholder="Enter email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                      {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                    </div>
+
+                    {/* Password */}
+                    <div className="mb-4 relative">
+                      <label className="font-semibold text-black text-sm">Password *</label>
+                      <input
+                        type={showPass ? "text" : "password"}
+                        className="w-full mt-1 px-4 py-3 border rounded-xl outline-none focus:border-red-500"
+                        placeholder="Enter password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                      <span
+                        className="absolute right-4 top-10 cursor-pointer text-gray-500"
+                        onClick={() => setShowPass(!showPass)}
+                      >
+                        {showPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                      </span>
+                      {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div className="mb-6 relative">
+                      <label className="font-semibold text-black text-sm">Confirm Password *</label>
+                      <input
+                        type={showConfirmPass ? "text" : "password"}
+                        className="w-full mt-1 px-4 py-3 border rounded-xl outline-none focus:border-red-500"
+                        placeholder="Confirm password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onPaste={preventCopyPaste}
+                        onCopy={preventCopyPaste}
+                        onCut={preventCopyPaste}
+                        autoComplete="new-password"
+                      />
+                      <span
+                        className="absolute right-4 top-10 cursor-pointer text-gray-500"
+                        onClick={() => setShowConfirmPass(!showConfirmPass)}
+                      >
+                        {showConfirmPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Must include uppercase, lowercase, number & special character
+                      </p>
+
+                      {errors.confirmPassword && (
+                        <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+                      )}
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                      className="w-full bg-primary text-white font-semibold py-3 rounded-full text-lg flex justify-center items-center gap-2"
+                      disabled={loading}
+                      onClick={handleEmailSignup}
+                    >
+                      {loading && <span className="loader"></span>}
+                      {loading ? "Creating..." : "Sign Up"}
+                    </button>
+
+                    {/* Google */}
+                    <div className="flex justify-center mt-4">
+                      <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition" onClick={loginWithGoogle}>
+                        <FcGoogle size={40} />
+                      </button>
+                    </div>
+
+                    {/* Terms */}
+                    <div className="text-center text-black mt-5">
+                      <p>By registering, you agree to our</p>
+                      <p>
+                        <a href="/terms-of-use" className="text-primary underline">Terms of service</a> and{" "}
+                        <a href="/privacyPolicy" className="text-primary underline">Privacy Policy</a>
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* PHONE FORM */}
+                {activeTab === "phone" && (
+                  <>
+                    <div className="mb-4">
+                      <label className="font-semibold text-black text-sm">Mobile No *</label>
+                      <PhoneInput
+                        country={"in"}
+                        value={phone}
+                        onChange={setPhone}
+                        inputClass="!w-full !h-[48px] !rounded-lg"
+                        containerClass="!w-full"
+                        buttonClass="!bg-white !rounded-s-lg"
+                        dropdownClass="text-black"
+                        placeholder="Enter Mobile Number"
+                      />
+                      {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                    </div>
+
+                    {/* Info message for phone signup */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                      <p className="text-xs text-gray-700">
+                        You'll receive a one-time password (OTP) via SMS to verify your number.
+                      </p>
+                    </div>
+
+                    {/* Send OTP */}
+                    <button
+                      className="w-full bg-primary text-white font-semibold py-3 rounded-full text-lg flex justify-center items-center gap-2"
+                      disabled={loading}
+                      onClick={handleSendOtp}
+                    >
+                      {loading && <span className="loader"></span>}
+                      {loading ? "Sending OTP..." : "Send OTP"}
+                    </button>
+
+                    {/* Google Login */}
+                    <div className="flex justify-center mt-4">
+                      <button className="border px-5 py-2 rounded-lg hover:bg-gray-100 transition" onClick={loginWithGoogle}>
+                        <FcGoogle size={40} />
+                      </button>
+                    </div>
+
+                    {/* Terms */}
+                    <div className="text-center text-black mt-5">
+                      <p>By registering, you agree to our</p>
+                      <p>
+                        <a href="/terms-of-use" className="text-primary underline">Terms of service</a> and{" "}
+                        <a href="/privacyPolicy" className="text-primary underline">Privacy Policy</a>
+                      </p>
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>

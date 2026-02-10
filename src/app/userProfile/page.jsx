@@ -298,6 +298,7 @@ export default function ProfilePage() {
                   />
                 </div>
 
+                {/* ✅ ENHANCED EMAIL FIELD */}
                 <div>
                   <label className="text-sm font-semibold text-gray-700">
                     Email*
@@ -305,19 +306,26 @@ export default function ProfilePage() {
                   <input
                     type="email"
                     disabled={emailLocked}
+                    readOnly={emailLocked}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
+                    className={`w-full mt-1 border rounded-lg px-4 py-3 ${
+                      emailLocked 
+                        ? 'bg-gray-200 text-gray-600 cursor-not-allowed border-gray-300 opacity-70' 
+                        : 'border-gray-300 bg-white'
+                    }`}
+                    title={emailLocked ? "Email cannot be changed" : ""}
                   />
-
                 </div>
 
+                {/* ✅ ENHANCED PHONE FIELD */}
                 <div>
                   <label className="text-sm font-semibold text-gray-700">
                     Phone*
                   </label>
                   <input
                     disabled={phoneLocked}
+                    readOnly={phoneLocked}
                     type="text"
                     value={phone}
                     maxLength={10}
@@ -327,9 +335,13 @@ export default function ProfilePage() {
                         setPhone(value);
                       }
                     }}
-                    className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-3"
+                    className={`w-full mt-1 border rounded-lg px-4 py-3 ${
+                      phoneLocked 
+                        ? 'bg-gray-200 text-gray-600 cursor-not-allowed border-gray-300 opacity-70' 
+                        : 'border-gray-300 bg-white'
+                    }`}
+                    title={phoneLocked ? "Phone cannot be changed" : ""}
                   />
-
                 </div>
               </div>
 
@@ -362,4 +374,4 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-}
+} 

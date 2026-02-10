@@ -28,10 +28,10 @@ export default function Footer() {
         <div>
           <h3 className="font-medium mb-3">Company</h3>
           <ul className="space-y-2 text-sm">
-            <li className="cursor-pointer" onClick={() => router.push('/about')}>About Us</li>
-            <li className="cursor-pointer" onClick={() => router.push('/features')}>Features</li>
-            <li>Refer & Earn</li>
-            <li>Support</li>
+            <li className="cursor-pointer hover:underline" onClick={() => router.push('/about')}>About Us</li>
+            <li className="cursor-pointer hover:underline" onClick={() => router.push('/features')}>Features</li>
+            <li className="cursor-pointer hover:underline" onClick={() => router.push('/refer-and-earn')}>Refer & Earn</li>
+            <li className="cursor-pointer hover:underline" onClick={() => router.push('/support')}>Support</li>
           </ul>
         </div>
 
@@ -39,10 +39,10 @@ export default function Footer() {
         <div>
           <h3 className="font-medium mb-3">Legal</h3>
           <ul className="space-y-2 text-sm">
-            <li className="cursor-pointer" onClick={() => router.push('/terms-of-use')}>Terms of Use</li>
-            <li className="cursor-pointer" onClick={() => router.push('/privacyPolicy')}>Privacy Policy</li>
-            <li>FAQ</li>
-            <li>Community Rules</li>
+            <li className="cursor-pointer hover:underline" onClick={() => router.push('/terms-of-use')}>Terms of Use</li>
+            <li className="cursor-pointer hover:underline" onClick={() => router.push('/privacyPolicy')}>Privacy Policy</li>
+            <li className="cursor-pointer hover:underline" onClick={() => router.push('/faq')}>FAQ</li>
+            <li className="cursor-pointer hover:underline" onClick={() => router.push('/community-rules')}>Community Rules</li>
           </ul>
         </div>
 

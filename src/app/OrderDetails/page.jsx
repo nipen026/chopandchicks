@@ -182,11 +182,11 @@ export default function OrderDetails() {
     }
 
     if (loading) {
-        return <p className="text-center py-20">Loading order...</p>;
+        return <div className="h-[47vh] flex items-center justify-center"><p className="text-center py-20">Loading order...</p></div>;
     }
 
     if (!order) {
-        return <p className="text-center py-20">Order not found</p>;
+        return <div className="h-[47vh] flex items-center justify-center"><p className="text-center py-20">Order not found</p></div>;
     }
     const handleNavigateToChat = () => {
         router.push(`/userProfile?orderId=${order.id}`);

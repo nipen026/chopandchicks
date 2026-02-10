@@ -1,5 +1,7 @@
+import { supabase } from "../../lib/supabaseClient";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const categories = [
   { name: "Mutton", img: "/assets/cat-1.png" },
@@ -11,7 +13,12 @@ const categories = [
 ];
 
 export default function CategorySection() {
-  const router = useRouter()
+  const router = useRouter();
+  // useEffect(async () => {
+  //   let { data: sub_category, error } = await supabase
+  //     .from('sub_category')
+  //     .select('*')
+  // }, [])
   return (
     <div className="container bg-[#F5F7FA] py-12 ">
       {/* Heading */}
