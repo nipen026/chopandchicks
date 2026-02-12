@@ -14,7 +14,7 @@ export default function CategoryCard({ product }) {
             {/* IMAGE */}
             <div className="w-full h-56 rounded-t-2xl overflow-hidden" onClick={() => handleClick()}>
                 <Image
-                    src={product.image.thumbnail_url}
+                    src={product.image.image_url}
                     alt={product.name}
                     width={400}
                     height={300}

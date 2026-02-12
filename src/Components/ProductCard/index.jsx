@@ -14,26 +14,26 @@ export default function ProductCard({ item, page }) {
   // Safely get image URL with fallback
   const getImageUrl = () => {
     // Check if item and item.image exist
-    if (!item || !item.image) {
-      return "/assets/placeholder-product.png"; // Add your placeholder image path
-    }
+    // if (!item || !item.image) {
+    //   return "/assets/placeholder-product.png"; // Add your placeholder image path
+    // }
 
     // Check if thumbnail_url exists and is a valid string
-    if (item.image.thumbnail_url && typeof item.image.thumbnail_url === "string") {
-      return item.image.thumbnail_url;
-    }
+    // if (item.image.thumbnail_url && typeof item.image.thumbnail_url === "string") {
+    //   return item.image.thumbnail_url;
+    // }
 
     // Fallback to other possible image properties
-    if (item.image.url && typeof item.image.url === "string") {
-      return item.image.url;
+    if (item.image.image_url && typeof item.image.image_url === "string") {
+      return item.image.image_url;
     }
 
-    if (item.image.src && typeof item.image.src === "string") {
-      return item.image.src;
-    }
+    // if (item.image.src && typeof item.image.src === "string") {
+    //   return item.image.src;
+    // }
 
     // Final fallback
-    return "/assets/placeholder-product.png";
+    // return "/assets/placeholder-product.png";
   };
 
   const imageUrl = getImageUrl();

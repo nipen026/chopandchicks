@@ -40,7 +40,7 @@ export default function Category() {
                             Most popular products near you!
                         </p>
                         <div className="grid grid-cols-1 lg:grid-cols-4  md:grid-cols-3 sm:grid-cols-2 ">
-                            {products.map((item, index) => (
+                            {products.filter((item) => item.category === cat.toLowerCase()).map((item, index) => (
                                 <div key={index} className="px-2 mt-3">
                                     <CategoryCard product={item} />
                                 </div>

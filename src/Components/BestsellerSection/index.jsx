@@ -54,7 +54,7 @@ export default function BestsellerSection({ title, desc }) {
             0: { slidesPerView: 1.2 },
           }}
         >
-          {products.map((item, index) => (
+          {products.filter((obj)=>obj.is_best_seller).map((item, index) => (
             <SwiperSlide key={index}>
               <ProductCard item={item} />
             </SwiperSlide>
